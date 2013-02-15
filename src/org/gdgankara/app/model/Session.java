@@ -4,7 +4,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Session {
-	private int id;
+	public static final String KIND = "sessions";
+	public static final String DAY = "Day";
+	public static final String TIME = "Time";
+	public static final String HALL = "Hall";
+	public static final String TITLE = "Title";
+	public static final String DESCRIPTION = "Description";
+	public static final String SPEAKER = "Speaker";
+	
+	private long id;
 	private String day;
 	private String time;
 	private String hall;
@@ -12,7 +20,7 @@ public class Session {
 	private String description;
 	private String speaker;
 		
-	public Session(int id, String day, String time, String hall, String title,
+	public Session(long id, String day, String time, String hall, String title,
 			String description, String speaker) {
 		this.id = id;
 		this.day = day;
@@ -37,13 +45,7 @@ public class Session {
 		// TODO Auto-generated constructor stub
 	}
 	
-	public Session(String title, String description) {
-		this.title = title;
-		this.description = description;
-	}
-	
-
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 	public void setId(int id) {

@@ -5,10 +5,15 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<form action="../api/session" method="POST">
-		<label for="title">Title</label> <input name="title" /> <br /> 
+	<form action="../api/session/create" method="POST">
+		<label for="day">Day</label> <input name="day" /> <br />
+		<label for="time">Time</label> <input name="time" /> <br />
+		<label for="hall">Hall</label> <input name="hall" /> <br />
+		<label for="title">Title</label> <input name="title" /> <br />
+		<label for="speaker">speaker</label> <input name="speaker" /> <br /> 
 		Description:
-		<TEXTAREA NAME="description" COLS=40 ROWS=6></TEXTAREA><br /> 
+		<TEXTAREA NAME="description" COLS=40 ROWS=6></TEXTAREA><br />
+		
 		<input type="submit" value="Submit" />
 	</form>
 </body>

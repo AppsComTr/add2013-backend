@@ -28,33 +28,26 @@ public class SessionResource {
 	UriInfo uriInfo;
 	@Context
 	Request request;
-	String id;
-
-//	@POST
-//	@Consumes(MediaType.APPLICATION_JSON)
-//	public void createSession(JAXBElement<Session> session) {
-//		// TODO create new session in datastore
-//	}
-
+	
 	@POST
+	@Path("create")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void newSession(@FormParam("id") String id,
+	public void newSession(@FormParam("day") String day,
+			@FormParam("time") String time,
 			@FormParam("title") String title,
 			@FormParam("description") String description,
+			@FormParam("hall") String hall,
+			@FormParam("speaker") String speaker,
 			@Context HttpServletResponse servletResponse) throws IOException {
-		Entity eSession = new Entity("Session");
-		eSession.setProperty("title", title);
-		eSession.setProperty("description", description);
-		Key dumur = DatastoreServiceFactory.getDatastoreService().put(eSession);
-		System.out.println(dumur.toString());
+		Entity eSession = new Entity(Session.KIND);
+		eSession.setProperty(Session.DAY, day);
+		eSession.setProperty(Session.TIME, time);
+		eSession.setProperty(Session.HALL, hall);
+		eSession.setProperty(Session.SPEAKER, speaker);
+		eSession.setProperty(Session.TITLE, title);
+		eSession.setProperty(Session.DESCRIPTION, description);
+		
 		servletResponse.sendRedirect("../webcontent/create_session.html");
 	}
-	
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("{id}")
-	public Session getSessionByID(@PathParam("id") int id){
-		//TODO return = datastore.getSessionByID(id);
-		return null;
-	}
+
 }
