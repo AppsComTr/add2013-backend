@@ -2,13 +2,9 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxb-api.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxb-impl-javadoc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxb-impl.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxb-xjc-javadoc.jar"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jaxb-xjc.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-bundle-1.17.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/asm-3.3.1.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/v1"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/JAXB2_20090708.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
