@@ -8,7 +8,6 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -34,11 +33,12 @@ public class SessionResource {
 	UriInfo uriInfo;
 	@Context
 	Request request;
-
+	
 	@POST
 	@Path("create")
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void newSession(@FormParam("day") String day,
+	public void newSession(@FormParam("lang") String lang,
+			@FormParam("day") String day,
 			@FormParam("start_hour") String startHour,
 			@FormParam("end_hour") String endHour,
 			@FormParam("title") String title,
@@ -47,6 +47,7 @@ public class SessionResource {
 			@FormParam("speaker") String speaker,
 			@Context HttpServletResponse servletResponse) throws IOException {
 		Entity eSession = new Entity(Session.KIND);
+		eSession.setProperty(Session.LANG, lang);
 		eSession.setProperty(Session.DAY, day);
 		eSession.setProperty(Session.START_HOUR, startHour);
 		eSession.setProperty(Session.END_HOUR, endHour);
@@ -59,6 +60,24 @@ public class SessionResource {
 		servletResponse
 				.sendRedirect("/webcontent/create_session.html?success=true");
 	}
+	
+	@POST
+	@Path("create")
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public void newSessionJson(JAXBElement<Session> jaxbSession) throws IOException {
+		Entity eSession = new Entity(Session.KIND);
+		Session session = jaxbSession.getValue();
+		eSession.setProperty(Session.LANG, session.getLang());
+		eSession.setProperty(Session.DAY, session.getDay());
+		eSession.setProperty(Session.START_HOUR, session.getStartHour());
+		eSession.setProperty(Session.END_HOUR, session.getEndHour());
+		eSession.setProperty(Session.HALL, session.getHall());
+		eSession.setProperty(Session.SPEAKER, session.getSpeaker());
+		eSession.setProperty(Session.TITLE, session.getTitle());
+		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
+		DatastoreServiceFactory.getDatastoreService().put(eSession);
+
+	}
 
 	@GET
 	@Path("{id}")
@@ -69,6 +88,7 @@ public class SessionResource {
 		Entity eSession = DatastoreServiceFactory.getDatastoreService().get(
 				KeyFactory.createKey(Session.KIND, id));
 		Session session = new Session(eSession.getKey().getId(),
+				(String) eSession.getProperty(Session.LANG),
 				(String) eSession.getProperty(Session.DAY),
 				(String) eSession.getProperty(Session.START_HOUR),
 				(String) eSession.getProperty(Session.END_HOUR),
@@ -79,8 +99,8 @@ public class SessionResource {
 		return session;
 	}
 
-	@PUT
-	@Path("{id}")
+	@POST
+	@Path("update/{id}")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public Session updateSessionByID(@PathParam("id") Long id,
 			JAXBElement<Session> jaxbSession) throws EntityNotFoundException {
@@ -92,12 +112,13 @@ public class SessionResource {
 			Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND,
 					id));
 			session = jaxbSession.getValue();
+			eSession.setProperty(Session.LANG, session.getLang());
 			eSession.setProperty(Session.DAY, session.getDay());
 			eSession.setProperty(Session.DESCRIPTION, session.getDescription());
-			eSession.setProperty(Session.END_HOUR, session.getEndTime());
+			eSession.setProperty(Session.END_HOUR, session.getEndHour());
 			eSession.setProperty(Session.HALL, session.getHall());
 			eSession.setProperty(Session.SPEAKER, session.getSpeaker());
-			eSession.setProperty(Session.START_HOUR, session.getStartTime());
+			eSession.setProperty(Session.START_HOUR, session.getStartHour());
 			eSession.setProperty(Session.TITLE, session.getTitle());
 
 			dataStore.put(eSession);
