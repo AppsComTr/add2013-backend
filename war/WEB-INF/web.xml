@@ -3,8 +3,8 @@
 
 	<init-param>
 		<!-- speed up initial Jersey loading by deactivating WADL -->
-		<param-name>com.sun.jersey.config.feature.DisableWADL</param-name>
-		<param-value>true</param-value>
+<!-- 		<param-name>com.sun.jersey.config.feature.DisableWADL</param-name> -->
+<!-- 		<param-value>true</param-value> -->
 	</init-param>
 
 	<servlet>

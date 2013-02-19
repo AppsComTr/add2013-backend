@@ -15,18 +15,19 @@ function createButtonClick() {
 
 function updateSession(id, title, speaker, day, hall, start_hour, end_hour, description) {
   $.ajax({
-    type: "PUT",
-    url: "http://localhost:8888/api/session/" + id,
+    type: "POST",
+    url: "http://"+window.location.host+"/api/session/update/" + id,
     dataType: "json",
-    data: {
+    contentType: 'application/json',
+    data: JSON.stringify({
       title: title,
       speaker: speaker,
       day: day,
       hall: hall,
       start_hour: start_hour,
       end_hour: end_hour,
-      description: description
-    },
+      description: description 
+    }),
     beforeSend: function() {
       log("beforeSend", "");
     },

@@ -6,5 +6,6 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/asm-3.3.1.jar"/>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/v1"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/JAXB2_20090708.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-all-1.9.11.jar"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>

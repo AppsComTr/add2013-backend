@@ -131,10 +131,9 @@ public class SessionResource {
 	}
 
 	@DELETE
-	@Path("{id}/delete")
+	@Path("delete/{id}")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public void deleteSessionByID(@PathParam("id") Long id) {
-		DatastoreServiceFactory.getDatastoreService().delete(
-				KeyFactory.createKey(Session.KIND, id));
+		DatastoreServiceFactory.getDatastoreService().delete(KeyFactory.createKey(Session.KIND, id));
 	}
 }
