@@ -10,10 +10,141 @@ $(document).ready(function() {
 });
 
 function createButtonClick() {
-
+ 
 };
 
-function updateSession(id, title, speaker, day, hall, start_hour, end_hour, description) {
+function getSpeakers(select){
+  $.ajax({
+          type: "GET",
+          url: "http://"+window.location.host+"/api/speakers",
+          success: function(response){
+            $.each(response.speaker, function(index, speaker) {
+               $('#' + select).append($('<option>', {
+                value: speaker.id,
+                text: speaker.id + "-" + speaker.lang + " " + speaker.name
+                }));
+            });
+          }
+  });
+}
+
+function createSpeaker(bio,blog,facebook,gplus,lang,name,photo,twitter){
+  $.ajax({
+    type: "POST",
+    url: "http://"+window.location.host+"/api/speaker/create",
+    dataType: "json",
+    contentType: 'application/json',
+    data: JSON.stringify({
+      bio: bio,
+      blog: blog,
+      facebook: facebook,
+      gplus: gplus,
+      lang: lang,
+      name: name,
+      photo: photo,
+      twitter: twitter
+    }),
+    beforeSend: function() {
+    },
+    success: function(response) {
+      log("update", response);
+    },
+    error: function(response) {
+      log("update", response);
+    },
+    complete: function() {
+      location.reload();
+    }
+  });
+}
+
+function updateSpeaker(id,bio,blog,facebook,gplus,lang,name,photo,twitter){
+  $.ajax({
+    type: "POST",
+    url: "http://"+window.location.host+"/api/speaker/update/" + id,
+    dataType: "json",
+    contentType: 'application/json',
+    data: JSON.stringify({
+      bio: bio,
+      blog: blog,
+      facebook: facebook,
+      gplus: gplus,
+      lang: lang,
+      name: name,
+      photo: photo,
+      twitter: twitter
+    }),
+    beforeSend: function() {
+    },
+    success: function(response) {
+      log("update", response);
+    },
+    error: function(response) {
+      log("update", response);
+    },
+    complete: function() {
+      location.reload();
+    }
+  });
+}
+
+function deleteSpeaker(id){
+  $.ajax({
+    type: "DELETE",
+    url: "http://"+window.location.host+"/api/speaker/delete/" + id,
+    success: function(response){
+      log("delete", response);
+    },
+    complete: function() {
+      location.reload();
+    }
+  });
+}
+
+function getSessions(lang, table){
+  $.ajax({
+          type: "GET",
+          url: "http://"+window.location.host+"/api/sessions/" + lang,
+          success: function(response){
+            $.each(response.session, function(index, session) {
+               $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
+            });
+          }
+        });
+  $('#tbodyTR').hide();
+}
+
+function createSession(lang, title, speaker, day, hall, start_hour, end_hour, description) {
+  $.ajax({
+    type: "POST",
+    url: "http://"+window.location.host+"/api/session/create",
+    dataType: "json",
+    contentType: 'application/json',
+    data: JSON.stringify({
+      title: title,
+      speaker: speaker,
+      day: day,
+      hall: hall,
+      startHour: start_hour,
+      endHour: end_hour,
+      description: description ,
+      lang: lang
+    }),
+    beforeSend: function() {
+    },
+    success: function(response) {
+      log("update", response);
+    },
+    error: function(response) {
+      log("update", response);
+    },
+    complete: function() {
+      location.reload();
+    }
+  });
+}
+
+function updateSession(id, activeLang, title, speaker, day, hall, start_hour, end_hour, description) {
   $.ajax({
     type: "POST",
     url: "http://"+window.location.host+"/api/session/update/" + id,
@@ -24,21 +155,34 @@ function updateSession(id, title, speaker, day, hall, start_hour, end_hour, desc
       speaker: speaker,
       day: day,
       hall: hall,
-      start_hour: start_hour,
-      end_hour: end_hour,
-      description: description 
+      startHour: start_hour,
+      endHour: end_hour,
+      description: description ,
+      lang: activeLang
     }),
     beforeSend: function() {
-      log("beforeSend", "");
     },
     success: function(response) {
-      log("success", response);
+      log("update", response);
     },
     error: function(response) {
-      log("error", response);
+      log("update", response);
     },
     complete: function() {
-      log("complete", response);
+      location.reload();
+    }
+  });
+}
+
+function deleteSession(id){
+  $.ajax({
+    type: "DELETE",
+    url: "http://"+window.location.host+"/api/session/delete/" + id,
+    success: function(response){
+      log("delete", response);
+    },
+    complete: function() {
+      location.reload();
     }
   });
 }

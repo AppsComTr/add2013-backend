@@ -3,7 +3,6 @@ package org.gdgankara.app.resources;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -11,22 +10,17 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.gdgankara.app.model.Session;
+import org.gdgankara.app.model.Speaker;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
-import com.google.appengine.api.datastore.Transaction;
 import com.google.appengine.api.datastore.Query.Filter;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
 
 @Path("/")
 public class BaseResources {
@@ -62,12 +56,40 @@ public class BaseResources {
 	}
 	
 	@GET
+	@Path("speakers")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<Speaker> getSpeakers() {
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
+		Query spekaerQuery = new Query(Speaker.KIND);
+		PreparedQuery preparedQuery = dataStore.prepare(spekaerQuery);
+		
+		List<Entity> eSpeakerList = preparedQuery.asList(FetchOptions.Builder
+				.withDefaults());
+		List<Speaker> speakerList = new ArrayList<Speaker>();
+		for (Entity eSpeaker : eSpeakerList) {
+			Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
+					(String) eSpeaker.getProperty(Speaker.BIO),
+					(String) eSpeaker.getProperty(Speaker.BLOG),
+					(String) eSpeaker.getProperty(Speaker.FACEBOOK),
+					(String) eSpeaker.getProperty(Speaker.GPLUS),
+					(String) eSpeaker.getProperty(Speaker.LANG),
+					(String) eSpeaker.getProperty(Speaker.NAME),
+					(String) eSpeaker.getProperty(Speaker.PHOTO),
+					(String) eSpeaker.getProperty(Speaker.TWITTER));
+			speakerList.add(speaker);
+		}
+		return speakerList;
+	}
+	
+	@GET
 	@Path("version")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String getVersion(){
 		DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 		Session session;		
 		Entity eSession = new Entity("version");
+		
 		return null;
 	}
 
@@ -100,7 +122,7 @@ public class BaseResources {
 		Entity eSession;
 		
 		try {
-			for (int i = 0; i < 11; i++) {
+			for (int i = 0; i < 4; i++) {
 				session = new Session("tr", "14 Haziran 2013 Cuma", hourArray[i],
 						hourArray[i + 1], "A", "Baslik_" + i + "_A_14", "Aciklama_"
 								+ i, "Konusmaci_" + i);

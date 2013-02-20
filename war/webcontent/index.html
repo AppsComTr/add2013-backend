@@ -11,45 +11,51 @@
     <link rel="stylesheet" href="themes/spacelab/bootstrap.min.css">
     <link rel="stylesheet" href="css/bootstrap-responsive.css">
     <script type="text/javascript">
+    
       $(function() {
-        $.ajax({
-          type: "GET",
-          url: "http://"+window.location.host+"/api/sessions/en",
-          success: function(response){
-            $.each(response.session, function(index, session) {
-               $('#tbodyEN').append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger"><i class="icon-remove"></i></button></td></tr>');
-            });
-          }
-        });
-        $.ajax({
-          type: "GET",
-          url: "http://"+window.location.host+"/api/sessions/tr",
-          success: function(response){
-            $.each(response.session, function(index, session) {
-               $('#tbodyTR').append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button id="btn" class="btn btn-mini btn-danger"><i class="icon-remove"></i></button></td></tr>');
-            });
-            $('#tbodyTR').hide();
-          }
-        });
+        getSessions("en", "tbodyEN");
+        getSessions("tr", "tbodyTR");
+        getSpeakers("speaker");
       });
 
       $(document).ready(function() {
         var clickedID;
+        var activeLang = "en";
         
         $('#btnShowTrTable').click(function(){
           $('#tbodyEN').hide();
           $('#tbodyTR').show();
+          activeLang = "tr";
           });
         $('#btnShowEnTable').click(function(){
           $('#tbodyEN').show();
           $('#tbodyTR').hide();
+          activeLang = "en";
           });
         
-        $(document).on("click", "#btnShowDeleteModal", function(){
-          $('#deleteModal').modal('show');
+        $(document).on('click', '#showCreateModal', function(){
+          $('#btnUpdateSession').hide();
+          $('#btnCreateSession').show();
+          $('#language').show();
+          
+          $('#updateModal').modal('show');
+          
+          //TODO needs refactor, doesn't work
+          $('#title').val("");
+          $('#speaker option').eq(0).selected;
+          $('#hall option').eq(0).selected;
+          $('#day option').eq(0).selected;
+          $('#startHour option').eq(0).selected;
+          $('#endHour option').eq(0).selected;
+          $('#description').val("");
+          
           });
         
         $(document).on("click", "#btnShowUpdateModal", function () {
+          $('#btnUpdateSession').show();
+          $('#btnCreateSession').hide();
+          $('#language').hide();
+          
           var id = $(this).data("id");
           clickedID = $(this).data("id");
           
@@ -71,12 +77,12 @@
             });
           
           var startHour = $('#'+id+'>td').eq(5).html();
-          $("#start_hour option").each(function(){
+          $("#startHour option").each(function(){
             this.selected = (this.text == startHour);
             });
           
           var endHour = $('#'+id+'>td').eq(6).html();
-          $("#end_hour option").each(function(){
+          $("#endHour option").each(function(){
             this.selected = (this.text == endHour);
             });
           
@@ -84,11 +90,28 @@
           
           $('#updateModal').modal('show');
         });
-        
-        $(document).on("click", "#btnUpdateSession", function(){
-          updateSession(clickedID, $('#title').val(), $('#speaker').val(), $('#day').val(), $('#hall').val(), $('#start_hour').val(), $('#end_hour').val(), $('#description').val());
-          $("updateModal").modal("dismiss");
+
+        $(document).on("click", "#btnShowDeleteModal", function(){
+          $('#deleteModal').modal('show');
+          clickedID = $(this).data("id");
           });
+
+        $(document).on("click", "#btnCreateSession", function(){
+          createSession($('#language').val(), $('#title').val(), $('#speaker').val(), $('#day').val(), $('#hall').val(), $('#startHour').val(), $('#endHour').val(), $('#description').val());
+          $("#updateModal").modal('hide');
+          });
+        
+        $(document).on("click", "#btnUpdateSession", function(){          
+          updateSession(clickedID, activeLang, $('#title').val(), $('#speaker').val(), $('#day').val(), $('#hall').val(), $('#startHour').val(), $('#endHour').val(), $('#description').val());
+          $("#updateModal").modal('hide');
+          
+          });
+        
+        $(document).on('click', "#btnDeleteSession", function(){
+          deleteSession(clickedID);
+          $('#deleteModal').modal('hide');
+          });
+
       });
     </script>
   </head>
@@ -103,7 +126,7 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Session<b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a href="/webcontent/create_session.html">Create</a> 
+                      <a href="#createModal" id="showCreateModal">Create</a> 
                     </li>
                     <li class="divider"></li>
                   </ul>
@@ -143,6 +166,7 @@
                   </tbody>
                 </table>
             </div>
+            
             <div class="modal large hide fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -151,6 +175,10 @@
                 <div class="modal-body">
                       <div id="updateForm">
                       <input class="span4" type="text" name="title" id="title" value="">
+                      <select class="span4" name="language" id="language">
+                        <option value="en">English</option>
+                        <option value="tr">Türkçe</option>
+                      </select>
                       <select class="span4" name="speaker" id="speaker">
                         <option>Speaker_0</option>
                         <option>Speaker_1</option>
@@ -177,7 +205,7 @@
                       <div class="control-group">
                         <label class="control-label">Start Hour - End Hour</label>
                         <div class="controls">
-                          <select class="span2" name="start_hour" id="start_hour">
+                          <select class="span2" name="startHour" id="startHour">
                             <option>09:00</option>
                             <option>09:15</option>
                             <option>09:30</option>
@@ -224,7 +252,7 @@
                             <option>19:45</option>
                             <option>20:00</option>
                           </select>
-                          <select class="span2" name="end_hour" id="end_hour">
+                          <select class="span2" name="endHour" id="endHour">
                             <option>09:00</option>
                             <option>09:15</option>
                             <option>09:30</option>
@@ -279,9 +307,10 @@
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
                     <button class="btn btn-warning" id="btnUpdateSession">Save</button>
+                    <button class="btn btn-warning" id="btnCreateSession">Create</button>
                 </div>
             </div>
-            <div class="modal large hide fade" id="myDeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal large hide fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                     <h3 id="myModalLabel">Delete Confirmation</h3>
@@ -291,7 +320,7 @@
                 </div>
                 <div class="modal-footer">
                     <button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-                    <button class="btn btn-danger" data-dismiss="modal">Delete</button>
+                    <button class="btn btn-danger" id="btnDeleteSession">Delete</button>
                 </div>
             </div>
           </div>

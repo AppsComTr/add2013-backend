@@ -24,7 +24,6 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.KeyFactory;
-import com.google.appengine.api.datastore.Transaction;
 
 @Path("/session")
 public class SessionResource {
@@ -79,6 +78,35 @@ public class SessionResource {
 
 	}
 
+	@POST
+	@Path("update/{id}")
+	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
+	public Session updateSessionByID(@PathParam("id") Long id,
+			JAXBElement<Session> jaxbSession) throws EntityNotFoundException {
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
+		Session session = jaxbSession.getValue();
+		Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND,
+				id));
+		eSession.setProperty(Session.LANG, session.getLang());
+		eSession.setProperty(Session.DAY, session.getDay());
+		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
+		eSession.setProperty(Session.END_HOUR, session.getEndHour());
+		eSession.setProperty(Session.HALL, session.getHall());
+		eSession.setProperty(Session.SPEAKER, session.getSpeaker());
+		eSession.setProperty(Session.START_HOUR, session.getStartHour());
+		eSession.setProperty(Session.TITLE, session.getTitle());
+
+		dataStore.put(eSession);
+		return session;
+	}
+
+	@DELETE
+	@Path("delete/{id}")
+	public void deleteSessionByID(@PathParam("id") Long id) {
+		DatastoreServiceFactory.getDatastoreService().delete(KeyFactory.createKey(Session.KIND, id));
+	}
+	
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -97,43 +125,5 @@ public class SessionResource {
 				(String) eSession.getProperty(Session.DESCRIPTION),
 				(String) eSession.getProperty(Session.SPEAKER));
 		return session;
-	}
-
-	@POST
-	@Path("update/{id}")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public Session updateSessionByID(@PathParam("id") Long id,
-			JAXBElement<Session> jaxbSession) throws EntityNotFoundException {
-		DatastoreService dataStore = DatastoreServiceFactory
-				.getDatastoreService();
-		Transaction dsTransaction = dataStore.beginTransaction();
-		Session session = null;
-		try {
-			Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND,
-					id));
-			session = jaxbSession.getValue();
-			eSession.setProperty(Session.LANG, session.getLang());
-			eSession.setProperty(Session.DAY, session.getDay());
-			eSession.setProperty(Session.DESCRIPTION, session.getDescription());
-			eSession.setProperty(Session.END_HOUR, session.getEndHour());
-			eSession.setProperty(Session.HALL, session.getHall());
-			eSession.setProperty(Session.SPEAKER, session.getSpeaker());
-			eSession.setProperty(Session.START_HOUR, session.getStartHour());
-			eSession.setProperty(Session.TITLE, session.getTitle());
-
-			dataStore.put(eSession);
-			dsTransaction.commit();
-		} finally {
-			if (dsTransaction.isActive())
-				dsTransaction.rollback();
-		}
-		return session;
-	}
-
-	@DELETE
-	@Path("delete/{id}")
-	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public void deleteSessionByID(@PathParam("id") Long id) {
-		DatastoreServiceFactory.getDatastoreService().delete(KeyFactory.createKey(Session.KIND, id));
 	}
 }
