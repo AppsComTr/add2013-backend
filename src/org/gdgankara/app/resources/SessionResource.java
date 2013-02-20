@@ -33,38 +33,12 @@ public class SessionResource {
 	UriInfo uriInfo;
 	@Context
 	Request request;
-	
-	@POST
-	@Path("create")
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public void newSession(@FormParam("lang") String lang,
-			@FormParam("day") String day,
-			@FormParam("start_hour") String startHour,
-			@FormParam("end_hour") String endHour,
-			@FormParam("title") String title,
-			@FormParam("description") String description,
-			@FormParam("hall") String hall,
-			@FormParam("speaker") String speaker,
-			@Context HttpServletResponse servletResponse) throws IOException {
-		Entity eSession = new Entity(Session.KIND);
-		eSession.setProperty(Session.LANG, lang);
-		eSession.setProperty(Session.DAY, day);
-		eSession.setProperty(Session.START_HOUR, startHour);
-		eSession.setProperty(Session.END_HOUR, endHour);
-		eSession.setProperty(Session.HALL, hall);
-		eSession.setProperty(Session.SPEAKER, speaker);
-		eSession.setProperty(Session.TITLE, title);
-		eSession.setProperty(Session.DESCRIPTION, description);
-		DatastoreServiceFactory.getDatastoreService().put(eSession);
-		Version.setVersion();
-		servletResponse
-				.sendRedirect("/webcontent/create_session.html?success=true");
-	}
-	
+
 	@POST
 	@Path("create")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public void newSessionJson(JAXBElement<Session> jaxbSession) throws IOException {
+	public void newSessionJson(JAXBElement<Session> jaxbSession)
+			throws IOException {
 		Entity eSession = new Entity(Session.KIND);
 		Session session = jaxbSession.getValue();
 		eSession.setProperty(Session.LANG, session.getLang());
@@ -87,8 +61,7 @@ public class SessionResource {
 		DatastoreService dataStore = DatastoreServiceFactory
 				.getDatastoreService();
 		Session session = jaxbSession.getValue();
-		Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND,
-				id));
+		Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND, id));
 		eSession.setProperty(Session.LANG, session.getLang());
 		eSession.setProperty(Session.DAY, session.getDay());
 		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
@@ -98,7 +71,7 @@ public class SessionResource {
 		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.TITLE, session.getTitle());
 		dataStore.put(eSession);
-		
+
 		Version.setVersion();
 		return session;
 	}
@@ -106,10 +79,11 @@ public class SessionResource {
 	@DELETE
 	@Path("delete/{id}")
 	public void deleteSessionByID(@PathParam("id") Long id) {
-		DatastoreServiceFactory.getDatastoreService().delete(KeyFactory.createKey(Session.KIND, id));
+		DatastoreServiceFactory.getDatastoreService().delete(
+				KeyFactory.createKey(Session.KIND, id));
 		Version.setVersion();
 	}
-	
+
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)

@@ -1,6 +1,18 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.google.appengine.api.users.User" %>
+<%@ page import="com.google.appengine.api.users.UserService" %>
+<%@ page import="com.google.appengine.api.users.UserServiceFactory" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
-  
+  <%
+   UserService userService = UserServiceFactory.getUserService();
+   User user = userService.getCurrentUser();
+	if (user != null) {
+		
+	}else {
+		response.sendRedirect(userService.createLoginURL("/index.jsp"));
+	}
+   %>
   <head>
     <script src="js/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -135,14 +147,15 @@
             <div class="pull-left">
               <ul class="nav pull-left">
                 <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Session<b class="caret"></b></a>
+                  <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sessions<b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a href="#createModal" id="showCreateModal">Create</a> 
+                      <a href="" id="showCreateModal">Create</a> 
                     </li>
                     <li class="divider"></li>
                   </ul>
                 </li>
+                <li><a href="/speakers.jsp">Speakers</a></li>
               </ul>
             </div>
           </div>

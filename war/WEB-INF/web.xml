@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?><web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="2.5" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
 	<display-name>org.gdgankara.app</display-name>
 
-	<init-param>
-		<!-- speed up initial Jersey loading by deactivating WADL -->
-<!-- 		<param-name>com.sun.jersey.config.feature.DisableWADL</param-name> -->
-<!-- 		<param-value>true</param-value> -->
-	</init-param>
-	
 	<servlet>
 		<servlet-name>Jersey REST Service</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
@@ -20,7 +14,10 @@
 		<servlet-name>Jersey REST Service</servlet-name>
 		<url-pattern>/api/*</url-pattern>
 	</servlet-mapping>
-
+	
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
 
 	<servlet>
 		<servlet-name>SystemServiceServlet</servlet-name>

@@ -1,18 +1,3 @@
-$(document).ready(function() {
-
-  $('#btnUpdate').click(function(e) {
-    //e.preventDefault();
-    var id = 7; //getParameterByName('id', window.location.href);
-    log("1", id);
-    //updateSession(id, $('#title').val(), $('#speaker').val(), $('#day').val(), $('#hall').val(), $('#start_hour').val(), $('#end_hour').val(), $('#description').val());
-    log("2", id);
-  });
-});
-
-function createButtonClick() {
- 
-};
-
 function getSpeakers(select){
   $.ajax({
           type: "GET",
