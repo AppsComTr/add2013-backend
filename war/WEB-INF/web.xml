@@ -6,7 +6,7 @@
 <!-- 		<param-name>com.sun.jersey.config.feature.DisableWADL</param-name> -->
 <!-- 		<param-value>true</param-value> -->
 	</init-param>
-
+	
 	<servlet>
 		<servlet-name>Jersey REST Service</servlet-name>
 		<servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>

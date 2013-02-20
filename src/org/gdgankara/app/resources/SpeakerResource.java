@@ -16,6 +16,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
 import org.gdgankara.app.model.Speaker;
+import org.gdgankara.app.model.Version;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -25,7 +26,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 
 @Path("/speaker")
 public class SpeakerResource {
-	
+
 	@Context
 	UriInfo uriInfo;
 	@Context
@@ -47,7 +48,7 @@ public class SpeakerResource {
 		eSpeaker.setProperty(Speaker.PHOTO, speaker.getPhoto());
 		eSpeaker.setProperty(Speaker.TWITTER, speaker.getTwitter());
 		DatastoreServiceFactory.getDatastoreService().put(eSpeaker);
-
+		Version.setVersion();
 	}
 
 	@POST
@@ -67,8 +68,8 @@ public class SpeakerResource {
 		eSpeaker.setProperty(Speaker.NAME, speaker.getName());
 		eSpeaker.setProperty(Speaker.PHOTO, speaker.getPhoto());
 		eSpeaker.setProperty(Speaker.TWITTER, speaker.getTwitter());
-
 		dataStore.put(eSpeaker);
+		Version.setVersion();
 		return speaker;
 	}
 
@@ -77,6 +78,7 @@ public class SpeakerResource {
 	public void deleteSpeakerByID(@PathParam("id") Long id) {
 		DatastoreServiceFactory.getDatastoreService().delete(
 				KeyFactory.createKey(Speaker.KIND, id));
+		Version.setVersion();
 	}
 
 	@GET

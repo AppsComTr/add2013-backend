@@ -18,6 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
 import org.gdgankara.app.model.Session;
+import org.gdgankara.app.model.Version;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -55,7 +56,7 @@ public class SessionResource {
 		eSession.setProperty(Session.TITLE, title);
 		eSession.setProperty(Session.DESCRIPTION, description);
 		DatastoreServiceFactory.getDatastoreService().put(eSession);
-
+		Version.setVersion();
 		servletResponse
 				.sendRedirect("/webcontent/create_session.html?success=true");
 	}
@@ -75,7 +76,7 @@ public class SessionResource {
 		eSession.setProperty(Session.TITLE, session.getTitle());
 		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
 		DatastoreServiceFactory.getDatastoreService().put(eSession);
-
+		Version.setVersion();
 	}
 
 	@POST
@@ -96,8 +97,9 @@ public class SessionResource {
 		eSession.setProperty(Session.SPEAKER, session.getSpeaker());
 		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.TITLE, session.getTitle());
-
 		dataStore.put(eSession);
+		
+		Version.setVersion();
 		return session;
 	}
 
@@ -105,6 +107,7 @@ public class SessionResource {
 	@Path("delete/{id}")
 	public void deleteSessionByID(@PathParam("id") Long id) {
 		DatastoreServiceFactory.getDatastoreService().delete(KeyFactory.createKey(Session.KIND, id));
+		Version.setVersion();
 	}
 	
 	@GET

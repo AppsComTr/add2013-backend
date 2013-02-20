@@ -18,7 +18,7 @@ function getSpeakers(select){
           type: "GET",
           url: "http://"+window.location.host+"/api/speakers",
           success: function(response){
-            $.each(response.speaker, function(index, speaker) {
+            $.each(response.speakers, function(index, speaker) {
                $('#' + select).append($('<option>', {
                 value: speaker.id,
                 text: speaker.id + "-" + speaker.lang + " " + speaker.name
@@ -106,7 +106,7 @@ function getSessions(lang, table){
           type: "GET",
           url: "http://"+window.location.host+"/api/sessions/" + lang,
           success: function(response){
-            $.each(response.session, function(index, session) {
+            $.each(response.sessions, function(index, session) {
                $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
             });
           }
