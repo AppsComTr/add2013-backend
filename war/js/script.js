@@ -94,6 +94,9 @@ function getSessions(lang, table){
             $.each(response.sessions, function(index, session) {
                $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
             });
+            $.each(response.breaks, function(index, session) {
+                $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
+             });
           }
         });
   $('#tbodyTR').hide();
