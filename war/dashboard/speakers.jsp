@@ -10,7 +10,7 @@
 	if (user != null) {
 		
 	}else {
-		response.sendRedirect(userService.createLoginURL("/index.jsp"));
+		response.sendRedirect(userService.createLoginURL("../index.jsp"));
 	}
    %>
   <head>

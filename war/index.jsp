@@ -14,7 +14,7 @@
    UserService userService = UserServiceFactory.getUserService();
    User user = userService.getCurrentUser();
 	if (user != null) {
-		response.sendRedirect("/dashboard.jsp");
+		response.sendRedirect("/dashboard/dashboard.jsp");
 	}else {
 		response.sendRedirect(userService.createLoginURL("/index.jsp"));
 	}

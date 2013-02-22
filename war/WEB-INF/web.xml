@@ -37,7 +37,7 @@
 	</servlet-mapping>
 	<security-constraint>
 		<web-resource-collection>
-			<url-pattern>/*</url-pattern>
+			<url-pattern>/dashboard/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>admin</role-name>
