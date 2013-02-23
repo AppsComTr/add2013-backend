@@ -9,18 +9,15 @@ public class SessionWrapper {
 
 	private Version version;
 	private List<Session> sessions;
-	private List<Session> breaks;
 
 	public SessionWrapper() {
 		super();
 	}
 
-	public SessionWrapper(Version version, List<Session> sessions,
-			List<Session> breaks) {
+	public SessionWrapper(Version version, List<Session> sessions) {
 		super();
 		this.version = version;
 		this.sessions = sessions;
-		this.breaks = breaks;
 	}
 
 	public Version getVersion() {
@@ -38,13 +35,4 @@ public class SessionWrapper {
 	public void setSessions(List<Session> sessions) {
 		this.sessions = sessions;
 	}
-
-	public List<Session> getBreaks() {
-		return breaks;
-	}
-
-	public void setBreaks(List<Session> breaks) {
-		this.breaks = breaks;
-	}
-
 }

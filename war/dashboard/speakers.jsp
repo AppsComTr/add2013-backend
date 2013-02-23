@@ -30,6 +30,7 @@
           url: "http://"+window.location.host+"/api/speakers",
           success: function(response){
             $.each(response.speakers, function(index, speaker) {
+              console.log(speaker.id);
                $('#tbody').append('<tr id="'+speaker.id+'"><td>' + speaker.id + '</td><td>' + speaker.name + '</td><td>' + speaker.blog + '</td><td>' + speaker.facebook + '</td><td>' + speaker.gplus + '</td><td>' + speaker.twitter + '</td><td>' + speaker.lang + '</td><td style="display:none">' + speaker.bio +'</td><td style="display:none">' + speaker.photo +'</td><td><button id="btnShowUpdateModal"  data-id="'+speaker.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+speaker.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
             });
           }
@@ -112,12 +113,12 @@
           <div class="container">
             <div class="pull-left">
               <ul class="nav pull-left">
-              	<li><a href="/dashboard.jsp">Seasons</a></li>
+              	<li><a href="./dashboard.jsp">Seasons</a></li>
                 <li class="dropdown">
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Speakers<b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a href="" id="showCreateModal">Create</a> 
+                      <a href="#" id="showCreateModal">Create</a> 
                     </li>
                     <li class="divider"></li>
                   </ul>
@@ -154,14 +155,14 @@
             
             <div class="modal large hide fade" id="updateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                     <h3 id="myModalLabel">Update</h3>
                 </div>
                 <div class="modal-body">
                       <div id="updateForm">
                       <select class="span4" name="language" id="language">
                         <option value="en">English</option>
-                        <option value="tr">TÃ¼rkÃ§e</option>
+                        <option value="tr">Türkçe</option>
                       </select>
                       <input class="span4" type="text" placeholder="Name" name="name" id="name" value="">
                       <input class="span4" type="text" placeholder="Blog" name="blog" id="blog" value="">
@@ -180,7 +181,7 @@
             </div>
             <div class="modal large hide fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">Ã</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">X</button>
                     <h3 id="myModalLabel">Delete Confirmation</h3>
                 </div>
                 <div class="modal-body">

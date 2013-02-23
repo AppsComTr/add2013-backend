@@ -150,12 +150,12 @@
                   <a href="#" class="dropdown-toggle" data-toggle="dropdown">Sessions<b class="caret"></b></a>
                   <ul class="dropdown-menu">
                     <li>
-                      <a href="" id="showCreateModal">Create</a> 
+                      <a href="#" id="showCreateModal">Create</a> 
                     </li>
                     <li class="divider"></li>
                   </ul>
                 </li>
-                <li><a href="/speakers.jsp">Speakers</a></li>
+                <li><a href="./speakers.jsp">Speakers</a></li>
               </ul>
             </div>
           </div>

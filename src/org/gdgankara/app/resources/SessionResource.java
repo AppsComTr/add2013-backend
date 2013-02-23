@@ -37,7 +37,8 @@ public class SessionResource {
 	@POST
 	@Path("create")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
-	public void newSessionJson(JAXBElement<Session> jaxbSession)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Session newSessionJson(JAXBElement<Session> jaxbSession)
 			throws IOException {
 		Entity eSession = new Entity(Session.KIND);
 		Session session = jaxbSession.getValue();
@@ -46,11 +47,16 @@ public class SessionResource {
 		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.END_HOUR, session.getEndHour());
 		eSession.setProperty(Session.HALL, session.getHall());
-		eSession.setProperty(Session.SPEAKER, session.getSpeaker());
+		eSession.setProperty(Session.BREAK, session.isBreak());
+		eSession.setProperty(Session.SPEAKER_1, session.getSpeaker1ID());
+		eSession.setProperty(Session.SPEAKER_2, session.getSpeaker2ID());
+		eSession.setProperty(Session.SPEAKER_3, session.getSpeaker3ID());
 		eSession.setProperty(Session.TITLE, session.getTitle());
 		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
+		
 		DatastoreServiceFactory.getDatastoreService().put(eSession);
 		Version.setVersion();
+		return session;
 	}
 
 	@POST
@@ -67,7 +73,10 @@ public class SessionResource {
 		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
 		eSession.setProperty(Session.END_HOUR, session.getEndHour());
 		eSession.setProperty(Session.HALL, session.getHall());
-		eSession.setProperty(Session.SPEAKER, session.getSpeaker());
+		eSession.setProperty(Session.BREAK, session.isBreak());
+		eSession.setProperty(Session.SPEAKER_1, session.getSpeaker1());
+		eSession.setProperty(Session.SPEAKER_2, session.getSpeaker2());
+		eSession.setProperty(Session.SPEAKER_3, session.getSpeaker3());
 		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.TITLE, session.getTitle());
 		dataStore.put(eSession);
@@ -82,25 +91,5 @@ public class SessionResource {
 		DatastoreServiceFactory.getDatastoreService().delete(
 				KeyFactory.createKey(Session.KIND, id));
 		Version.setVersion();
-	}
-
-	@GET
-	@Path("{id}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Session getSessionByID(@PathParam("id") Long id)
-			throws EntityNotFoundException {
-
-		Entity eSession = DatastoreServiceFactory.getDatastoreService().get(
-				KeyFactory.createKey(Session.KIND, id));
-		Session session = new Session(eSession.getKey().getId(),
-				(String) eSession.getProperty(Session.LANG),
-				(String) eSession.getProperty(Session.DAY),
-				(String) eSession.getProperty(Session.START_HOUR),
-				(String) eSession.getProperty(Session.END_HOUR),
-				(String) eSession.getProperty(Session.HALL),
-				(String) eSession.getProperty(Session.TITLE),
-				(String) eSession.getProperty(Session.DESCRIPTION),
-				(String) eSession.getProperty(Session.SPEAKER));
-		return session;
 	}
 }
