@@ -50,6 +50,26 @@ public class SpeakerResource {
 		DatastoreServiceFactory.getDatastoreService().put(eSpeaker);
 		Version.setVersion();
 	}
+	
+	@GET
+	@Path("{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Speaker getSpeakerByID(@PathParam("id") Long id)
+			throws EntityNotFoundException {
+
+		Entity eSpeaker = DatastoreServiceFactory.getDatastoreService().get(
+				KeyFactory.createKey(Speaker.KIND, id));
+		Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
+				(String) eSpeaker.getProperty(Speaker.BIO),
+				(String) eSpeaker.getProperty(Speaker.BLOG),
+				(String) eSpeaker.getProperty(Speaker.FACEBOOK),
+				(String) eSpeaker.getProperty(Speaker.GPLUS),
+				(String) eSpeaker.getProperty(Speaker.LANG),
+				(String) eSpeaker.getProperty(Speaker.NAME),
+				(String) eSpeaker.getProperty(Speaker.PHOTO),
+				(String) eSpeaker.getProperty(Speaker.TWITTER));
+		return speaker;
+	}
 
 	@POST
 	@Path("update/{id}")
@@ -79,25 +99,5 @@ public class SpeakerResource {
 		DatastoreServiceFactory.getDatastoreService().delete(
 				KeyFactory.createKey(Speaker.KIND, id));
 		Version.setVersion();
-	}
-
-	@GET
-	@Path("{id}")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Speaker getSpeakerByID(@PathParam("id") Long id)
-			throws EntityNotFoundException {
-
-		Entity eSpeaker = DatastoreServiceFactory.getDatastoreService().get(
-				KeyFactory.createKey(Speaker.KIND, id));
-		Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
-				(String) eSpeaker.getProperty(Speaker.BIO),
-				(String) eSpeaker.getProperty(Speaker.BLOG),
-				(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-				(String) eSpeaker.getProperty(Speaker.GPLUS),
-				(String) eSpeaker.getProperty(Speaker.LANG),
-				(String) eSpeaker.getProperty(Speaker.NAME),
-				(String) eSpeaker.getProperty(Speaker.PHOTO),
-				(String) eSpeaker.getProperty(Speaker.TWITTER));
-		return speaker;
 	}
 }
