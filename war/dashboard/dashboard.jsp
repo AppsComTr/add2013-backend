@@ -58,14 +58,16 @@
           
           $('#updateModal').modal('show');
           
-          //TODO needs refactor, doesn't work
           $('#title').val("");
-          $('#speaker option').eq(0).selected;
-          $('#hall option').eq(0).selected;
-          $('#day option').eq(0).selected;
-          $('#startHour option').eq(0).selected;
-          $('#endHour option').eq(0).selected;
+          $('#speaker1').val(0);
+          $('#speaker2').val(0);
+          $('#speaker3').val(0);
+          $('#hall').val(0);
+          $('#day').val(0);
+          $('#startHour').val(0);
+          $('#endHour').val(0);
           $('#description').val("");
+          $('#chkBreak').prop("checked",false);
           
           });
         
@@ -81,7 +83,9 @@
           
           var speakers = $('#'+id+'>td').eq(2).html().split(',');
           for(i=0;i<3;i++){
-            if(speakers[i] != ""){
+            if(speakers[i] == "break"){
+              $('#chkBreak').prop("checked",true);
+            }else if(speakers[i] != "" || speakers[i] != null){
               j = i + 1;
               $("#speaker" + j).val(speakers[i]);
             }
@@ -118,16 +122,12 @@
           });
 
         $(document).on("click", "#btnCreateSession", function(){
-          var speakers = $('#speaker1').val() + "," + $('#speaker2').val() + "," + $('#speaker3').val();
-          
-          createSession($('#language').val(), $('#title').val(), speakers, $('#day').val(), $('#hall').val(), $('#startHour').val(), $('#endHour').val(), $('#description').val());
+          createSession($('#language').val(), $('#day').val(), $('#startHour').val(), $('#endHour').val(), $('#hall').val(), $('#chkBreak').is(":checked"), $('#speaker1').val(), $('#speaker2').val(), $('#speaker3').val(), $('#title').val(),  $('#description').val());      
           $("#updateModal").modal('hide');
           });
         
         $(document).on("click", "#btnUpdateSession", function(){          
-          var speakers = $('#speaker1').val() + "," + $('#speaker2').val() + "," + $('#speaker3').val();
-          
-          updateSession(clickedID, activeLang, $('#title').val(), speakers, $('#day').val(), $('#hall').val(), $('#startHour').val(), $('#endHour').val(), $('#description').val());
+          updateSession(clickedID, activeLang, $('#day').val(), $('#startHour').val(), $('#endHour').val(), $('#hall').val(), $('#chkBreak').is(":checked"), $('#speaker1').val(), $('#speaker2').val(), $('#speaker3').val(), $('#title').val(),  $('#description').val());   
           $("#updateModal").modal('hide');
           });
         
@@ -178,7 +178,7 @@
                     <tr>
                       <th>ID</th>
                       <th>Title</th>
-                      <th>Speaker</th>
+                      <th>Speaker/Break</th>
                       <th>Hall</th>
                       <th>Day</th>
                       <th>Start Hour</th>
@@ -204,24 +204,15 @@
                         <option value="en">English</option>
                         <option value="tr">Türkçe</option>
                       </select>
+                      <input class="span4" type="checkbox" value="" id="chkBreak" name="checkbox">is Coffee Time?</input>
                       <select class="span4" name="speaker" id="speaker1">
                         <option></option>
-                        <option>Break</option>
-                        <option>Speaker_0</option>
-                        <option>Speaker_1</option>
-                        <option>Speaker_2</option>
                       </select>
                       <select class="span4" name="speaker" id="speaker2">
                         <option></option>
-                        <option>Speaker_0</option>
-                        <option>Speaker_1</option>
-                        <option>Speaker_2</option>
                       </select>
                       <select class="span4" name="speaker" id="speaker3">
                         <option></option>
-                        <option>Speaker_0</option>
-                        <option>Speaker_1</option>
-                        <option>Speaker_2</option>
                       </select>
                       <select class="span4" name="day" id="day">
                         <option>14 Haziran 2013 Cuma</option>

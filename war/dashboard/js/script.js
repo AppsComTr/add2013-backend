@@ -91,32 +91,38 @@ function getSessions(lang, table){
           type: "GET",
           url: "http://"+window.location.host+"/api/sessions/" + lang,
           success: function(response){
-            $.each(response.sessions, function(index, session) {
-               $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
-            });
-            $.each(response.breaks, function(index, session) {
-                $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + session.speaker + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
-             });
+            if(response.sessions != undefined){
+              $.each(response.sessions, function(index, session) {
+                if(session.break == "false"){
+                  $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>' + ((session.speaker1 == undefined)? null : session.speaker1.id) + ',' + ((session.speaker2 == undefined)? null : session.speaker2.id) + ',' + ((session.speaker3 == undefined)? null : session.speaker3.id) + '</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
+                }else{
+                  $('#' + table).append('<tr id="'+session.id+'"><td>' + session.id + '</td><td>' + session.title + '</td><td>break</td><td>' + session.hall + '</td><td>' + session.day + '</td><td>' + session.startHour + '</td><td>' + session.endHour + '</td><td style="display:none">' + session.description +'</td><td><button id="btnShowUpdateModal"  data-id="'+session.id+'" class="btn btn-mini btn-warning" ><i class="icon-pencil"></i></button> <button class="btn btn-mini btn-danger" data-id="'+session.id+'" id="btnShowDeleteModal"><i class="icon-remove"></i></button></td></tr>');
+                }
+               });
+            }
           }
         });
   $('#tbodyTR').hide();
 }
 
-function createSession(lang, title, speaker, day, hall, start_hour, end_hour, description) {
+function createSession(lang, day, start_hour, end_hour, hall, isBreak, speaker1ID, speaker2ID, speaker3ID, title, description) {
   $.ajax({
     type: "POST",
     url: "http://"+window.location.host+"/api/session/create",
     dataType: "json",
     contentType: 'application/json',
     data: JSON.stringify({
-      title: title,
-      speaker: speaker,
+      lang: lang,
       day: day,
-      hall: hall,
       startHour: start_hour,
       endHour: end_hour,
-      description: description ,
-      lang: lang
+      hall: hall,
+      break: isBreak,
+      speaker1ID: speaker1ID,
+      speaker2ID: speaker2ID,
+      speaker3ID: speaker3ID,
+      title: title,
+      description: description
     }),
     beforeSend: function() {
     },
@@ -132,21 +138,24 @@ function createSession(lang, title, speaker, day, hall, start_hour, end_hour, de
   });
 }
 
-function updateSession(id, activeLang, title, speaker, day, hall, start_hour, end_hour, description) {
+function updateSession(id, lang, day, start_hour, end_hour, hall, isBreak, speaker1ID, speaker2ID, speaker3ID, title, description)  {
   $.ajax({
     type: "POST",
     url: "http://"+window.location.host+"/api/session/update/" + id,
     dataType: "json",
     contentType: 'application/json',
     data: JSON.stringify({
-      title: title,
-      speaker: speaker,
+      lang: lang,
       day: day,
-      hall: hall,
       startHour: start_hour,
       endHour: end_hour,
-      description: description ,
-      lang: activeLang
+      hall: hall,
+      break: isBreak,
+      Speaker1: speaker1ID,
+      Speaker2: speaker2ID,
+      Speaker3: speaker3ID,
+      title: title,
+      description: description
     }),
     beforeSend: function() {
     },
