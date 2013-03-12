@@ -3,6 +3,7 @@ package org.gdgankara.app.resources;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -27,6 +28,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
@@ -44,33 +46,38 @@ public class SessionResource {
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
 	public Session newSessionJson(JAXBElement<Session> jaxbSession)
-			throws IOException {
+			throws IOException, EntityNotFoundException {
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
 		Entity eSession = new Entity(Session.KIND);
 		Session session = jaxbSession.getValue();
+		List<Long> speakerIDList = new ArrayList<Long>();
+		speakerIDList.add(session.getSpeaker1ID());
+		speakerIDList.add(session.getSpeaker2ID());
+		speakerIDList.add(session.getSpeaker3ID());
+
 		eSession.setProperty(Session.LANG, session.getLang());
 		eSession.setProperty(Session.DAY, session.getDay());
 		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.END_HOUR, session.getEndHour());
 		eSession.setProperty(Session.HALL, session.getHall());
 		eSession.setProperty(Session.BREAK, session.isBreak());
-		eSession.setProperty(Session.SPEAKER_1, session.getSpeaker1ID());
-		eSession.setProperty(Session.SPEAKER_2, session.getSpeaker2ID());
-		eSession.setProperty(Session.SPEAKER_3, session.getSpeaker3ID());
+		eSession.setProperty(Session.SPEAKER_LIST, speakerIDList);
 		eSession.setProperty(Session.TITLE, session.getTitle());
 		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
 
-		DatastoreServiceFactory.getDatastoreService().put(eSession);
+		dataStore.put(eSession);
+
 		Version.setVersion();
 		return session;
 	}
 
+	@SuppressWarnings("unchecked")
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SessionWrapper getSessionbyID(@PathParam("id") Long id)
 			throws EntityNotFoundException {
-		DatastoreService dataStore = DatastoreServiceFactory
-				.getDatastoreService();
 
 		Entity eSession = DatastoreServiceFactory.getDatastoreService().get(
 				KeyFactory.createKey(Session.KIND, id));
@@ -83,44 +90,34 @@ public class SessionResource {
 				(String) eSession.getProperty(Session.HALL),
 				(String) eSession.getProperty(Session.TITLE),
 				(String) eSession.getProperty(Session.DESCRIPTION),
-				(Boolean) eSession.getProperty(Session.BREAK), null, null, null);
+				(Boolean) eSession.getProperty(Session.BREAK), null, null,
+				null, (List<Long>) eSession.getProperty(Session.SPEAKER_LIST));
 
-		Query query = new Query(Speaker.KIND);
-		PreparedQuery preparedQuery = dataStore.prepare(query);
-		List<Entity> eSpeakerList = preparedQuery.asList(FetchOptions.Builder
-				.withDefaults());
-		List<Speaker> speakerList = new ArrayList<Speaker>();
+		List<Long> speakerIDList = session.getSpeakerIDList();
+		for (int i = 0; i < 3; i++) {
+			Long speakerID = speakerIDList.get(i);
+			if (speakerID != null) {
+				Entity eSpeaker = DatastoreServiceFactory.getDatastoreService()
+						.get(KeyFactory.createKey(Speaker.KIND, speakerID));
+				Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
+						(String) eSpeaker.getProperty(Speaker.BIO),
+						(String) eSpeaker.getProperty(Speaker.BLOG),
+						(String) eSpeaker.getProperty(Speaker.FACEBOOK),
+						(String) eSpeaker.getProperty(Speaker.GPLUS),
+						(String) eSpeaker.getProperty(Speaker.LANG),
+						(String) eSpeaker.getProperty(Speaker.NAME),
+						(String) eSpeaker.getProperty(Speaker.PHOTO),
+						(String) eSpeaker.getProperty(Speaker.TWITTER));
 
-		for (Entity eSpeaker : eSpeakerList) {
-			Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
-					(String) eSpeaker.getProperty(Speaker.BIO),
-					(String) eSpeaker.getProperty(Speaker.BLOG),
-					(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-					(String) eSpeaker.getProperty(Speaker.GPLUS),
-					(String) eSpeaker.getProperty(Speaker.LANG),
-					(String) eSpeaker.getProperty(Speaker.NAME),
-					(String) eSpeaker.getProperty(Speaker.PHOTO),
-					(String) eSpeaker.getProperty(Speaker.TWITTER));
-			speakerList.add(speaker);
-		}
-		
-		Long[] speakerIDArray = new Long[3];
-		speakerIDArray[0] = ((Long) eSession.getProperty(Session.SPEAKER_1) == null) ? 0
-				: ((Long) eSession.getProperty(Session.SPEAKER_1));
-		speakerIDArray[1] = ((Long) eSession.getProperty(Session.SPEAKER_2) == null) ? 0
-				: ((Long) eSession.getProperty(Session.SPEAKER_2));
-		speakerIDArray[2] = ((Long) eSession.getProperty(Session.SPEAKER_3) == null) ? 0
-				: ((Long) eSession.getProperty(Session.SPEAKER_3));
-
-		for (Speaker speaker : speakerList) {
-			if (speakerIDArray[0].equals(speaker.getId())) {
-				session.setSpeaker1(speaker);
-			}
-			if (speakerIDArray[1].equals(speaker.getId())) {
-				session.setSpeaker2(speaker);
-			}
-			if (speakerIDArray[2].equals(speaker.getId())) {
-				session.setSpeaker3(speaker);
+				if (i == 0) {
+					session.setSpeaker1(speaker);
+				} else if (i == 1) {
+					session.setSpeaker2(speaker);
+				} else if (i == 2) {
+					session.setSpeaker3(speaker);
+				}
+			} else {
+				speakerIDList.set(i, (long) 0);
 			}
 		}
 
@@ -138,17 +135,22 @@ public class SessionResource {
 				.getDatastoreService();
 		Session session = jaxbSession.getValue();
 		Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND, id));
+
+		List<Long> speakerIDList = new ArrayList<Long>();
+		speakerIDList.add(session.getSpeaker1ID());
+		speakerIDList.add(session.getSpeaker2ID());
+		speakerIDList.add(session.getSpeaker3ID());
+
 		eSession.setProperty(Session.LANG, session.getLang());
 		eSession.setProperty(Session.DAY, session.getDay());
-		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
+		eSession.setProperty(Session.START_HOUR, session.getStartHour());
 		eSession.setProperty(Session.END_HOUR, session.getEndHour());
 		eSession.setProperty(Session.HALL, session.getHall());
 		eSession.setProperty(Session.BREAK, session.isBreak());
-		eSession.setProperty(Session.SPEAKER_1, session.getSpeaker1());
-		eSession.setProperty(Session.SPEAKER_2, session.getSpeaker2());
-		eSession.setProperty(Session.SPEAKER_3, session.getSpeaker3());
-		eSession.setProperty(Session.START_HOUR, session.getStartHour());
+		eSession.setProperty(Session.SPEAKER_LIST, speakerIDList);
 		eSession.setProperty(Session.TITLE, session.getTitle());
+		eSession.setProperty(Session.DESCRIPTION, session.getDescription());
+
 		dataStore.put(eSession);
 
 		Version.setVersion();
@@ -162,4 +164,5 @@ public class SessionResource {
 				KeyFactory.createKey(Session.KIND, id));
 		Version.setVersion();
 	}
+
 }

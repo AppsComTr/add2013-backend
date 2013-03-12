@@ -1,5 +1,6 @@
 package org.gdgankara.app.model;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -15,9 +16,10 @@ public class Session {
 	public static final String TITLE = "Title";
 	public static final String DESCRIPTION = "Description";
 	public static final String BREAK = "Break";
-	public static final String SPEAKER_1 = "Speaker_1";
-	public static final String SPEAKER_2 = "Speaker_2";
-	public static final String SPEAKER_3 = "Speaker_3";
+	public static final String SPEAKER_1 = "Speaker1";
+	public static final String SPEAKER_2 = "Speaker2";
+	public static final String SPEAKER_3 = "Speaker3";
+	public static final String SPEAKER_LIST = "Speaker_List";
 
 	private long id;
 	private String lang;
@@ -31,16 +33,17 @@ public class Session {
 	private Speaker speaker1;
 	private Speaker speaker2;
 	private Speaker speaker3;
-	private Long speaker1ID;
-	private Long speaker2ID;
-	private Long speaker3ID;
-
+	private Long Speaker1ID;
+	private Long Speaker2ID;
+	private Long Speaker3ID;
+	private List<Long> speakerIDList;
+	
 	public Session() {
 	}
 	
 	public Session(long id, String lang, String day, String startHour,
 			String endHour, String hall, String title, String description, Boolean isBreak,
-			Speaker speaker1, Speaker speaker2, Speaker speaker3) {
+			Speaker speaker1, Speaker speaker2, Speaker speaker3, List<Long> speakerIDList) {
 		this.lang = lang;
 		this.id = id;
 		this.day = day;
@@ -53,6 +56,7 @@ public class Session {
 		this.speaker1 = speaker1;
 		this.speaker2 = speaker2;
 		this.speaker3 = speaker3;
+		this.speakerIDList = speakerIDList;
 	}
 
 	public Session(String lang, String day, String startHour, String endHour,
@@ -72,8 +76,7 @@ public class Session {
 	}
 	
 	public Session(String lang, String day, String startHour, String endHour,
-			String hall, String title, String description, Boolean isBreak,
-			Long speaker1ID, Long speaker2ID, Long speaker3ID){
+			String hall, String title, String description, Boolean isBreak, List<Long> speakerIDList){
 		this.lang = lang;
 		this.day = day;
 		this.startHour = startHour;
@@ -82,9 +85,7 @@ public class Session {
 		this.title = title;
 		this.description = description;
 		this.isBreak = isBreak;
-		this.speaker1ID = speaker1ID;
-		this.speaker2ID = speaker2ID;
-		this.speaker3ID = speaker3ID;
+		this.speakerIDList = speakerIDList;
 	}
 
 	public long getId() {
@@ -184,27 +185,34 @@ public class Session {
 	}
 	
 	public Long getSpeaker1ID() {
-		return speaker1ID;
+		return Speaker1ID;
 	}
 
-	public void setSpeaker1ID(Long speaker1id) {
-		speaker1ID = speaker1id;
+	public void setSpeaker1ID(Long Speaker1ID) {
+		this.Speaker1ID = Speaker1ID;
 	}
 
 	public Long getSpeaker2ID() {
-		return speaker2ID;
+		return Speaker2ID;
 	}
 
-	public void setSpeaker2ID(Long speaker2id) {
-		speaker2ID = speaker2id;
+	public void setSpeaker2ID(Long Speaker2ID) {
+		this.Speaker2ID = Speaker2ID;
 	}
 
 	public Long getSpeaker3ID() {
-		return speaker3ID;
+		return Speaker3ID;
 	}
 
-	public void setSpeaker3ID(Long speaker3id) {
-		speaker3ID = speaker3id;
+	public void setSpeaker3ID(Long Speaker3ID) {
+		this.Speaker3ID = Speaker3ID;
 	}
 
+	public List<Long> getSpeakerIDList() {
+		return speakerIDList;
+	}
+
+	public void setSpeakerIDList(List<Long> speakerIDs) {
+		this.speakerIDList = speakerIDs;
+	}
 }

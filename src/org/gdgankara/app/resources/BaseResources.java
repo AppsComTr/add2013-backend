@@ -27,6 +27,7 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 @Path("/")
 public class BaseResources {
 
+	@SuppressWarnings("unchecked")
 	@GET
 	@Path("sessions/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -70,7 +71,7 @@ public class BaseResources {
 					(String) entity.getProperty(Session.TITLE),
 					(String) entity.getProperty(Session.DESCRIPTION),
 					(Boolean) entity.getProperty(Session.BREAK), null, null,
-					null);
+					null, (List<Long>) entity.getProperty(Session.SPEAKER_LIST));
 
 			Long[] speakerIDArray = new Long[3];
 			speakerIDArray[0] = ((Long) entity.getProperty(Session.SPEAKER_1) == null) ? 0
@@ -110,7 +111,7 @@ public class BaseResources {
 		List<Entity> eSpeakerList = preparedQuery.asList(FetchOptions.Builder
 				.withDefaults());
 		List<Speaker> speakerList = new ArrayList<Speaker>();
-		
+
 		for (Entity eSpeaker : eSpeakerList) {
 			Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
 					(String) eSpeaker.getProperty(Speaker.BIO),

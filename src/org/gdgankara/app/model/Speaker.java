@@ -1,5 +1,7 @@
 package org.gdgankara.app.model;
 
+import java.util.List;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -8,6 +10,7 @@ public class Speaker {
 	public static final String LANG = "Lang";
 	public static final String LANG_TR = "tr";
 	public static final String LANG_EN = "en";
+	public static final String SESSION_LIST = "Session_List";
 	public static final String BIO = "bio";
 	public static final String BLOG = "blog";
 	public static final String FACEBOOK = "facebook";
@@ -16,6 +19,7 @@ public class Speaker {
 	public static final String PHOTO = "photo";
 	public static final String TWITTER = "twitter";
 
+	private List<Long> sessionIDList;
 	private long id;
 	private String bio;
 	private String blog;
@@ -125,6 +129,14 @@ public class Speaker {
 
 	public void setTwitter(String twitter) {
 		this.twitter = twitter;
+	}
+
+	public List<Long> getSessionIDs() {
+		return sessionIDList;
+	}
+
+	public void setSessionIDs(List<Long> sessionIDs) {
+		this.sessionIDList = sessionIDs;
 	}
 
 }
