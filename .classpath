@@ -2,7 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-bundle-1.17.jar"/>
+	<classpathentry kind="lib" path="war/WEB-INF/lib/jersey-bundle-1.17.jar" sourcepath="/home/bkyn/.m2/repository/com/sun/jersey/jersey-bundle/1.17/jersey-bundle-1.17-sources.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/asm-3.3.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/JAXB2_20090708.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/jackson-all-1.9.11.jar"/>
