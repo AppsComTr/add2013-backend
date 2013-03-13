@@ -128,7 +128,7 @@ public class BaseResources {
 		Version version = Version.getVersion();
 		return new SpeakerWrapper(version, speakerList);
 	}
-
+	
 	@GET
 	@Path("version/get")
 	@Produces(MediaType.APPLICATION_JSON)
