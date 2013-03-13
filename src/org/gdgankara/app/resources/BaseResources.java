@@ -14,6 +14,7 @@ import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.SpeakerWrapper;
 import org.gdgankara.app.model.Version;
+import org.gdgankara.app.utils.Util;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -27,7 +28,6 @@ import com.google.appengine.api.datastore.Query.FilterPredicate;
 @Path("/")
 public class BaseResources {
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Path("sessions/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -49,46 +49,19 @@ public class BaseResources {
 		List<Speaker> speakerList = new ArrayList<Speaker>();
 
 		for (Entity eSpeaker : eSpeakerList) {
-			Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
-					(String) eSpeaker.getProperty(Speaker.BIO),
-					(String) eSpeaker.getProperty(Speaker.BLOG),
-					(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-					(String) eSpeaker.getProperty(Speaker.GPLUS),
-					(String) eSpeaker.getProperty(Speaker.LANG),
-					(String) eSpeaker.getProperty(Speaker.NAME),
-					(String) eSpeaker.getProperty(Speaker.PHOTO),
-					(String) eSpeaker.getProperty(Speaker.TWITTER));
+			Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
 			speakerList.add(speaker);
 		}
 
 		for (Entity entity : eSessionList) {
-			Session session = new Session(entity.getKey().getId(),
-					(String) entity.getProperty(Session.LANG),
-					(String) entity.getProperty(Session.DAY),
-					(String) entity.getProperty(Session.START_HOUR),
-					(String) entity.getProperty(Session.END_HOUR),
-					(String) entity.getProperty(Session.HALL),
-					(String) entity.getProperty(Session.TITLE),
-					(String) entity.getProperty(Session.DESCRIPTION),
-					(Boolean) entity.getProperty(Session.BREAK), null, null,
-					null, (List<Long>) entity.getProperty(Session.SPEAKER_LIST));
-
-			Long[] speakerIDArray = new Long[3];
-			speakerIDArray[0] = ((Long) entity.getProperty(Session.SPEAKER_1) == null) ? 0
-					: ((Long) entity.getProperty(Session.SPEAKER_1));
-			speakerIDArray[1] = ((Long) entity.getProperty(Session.SPEAKER_2) == null) ? 0
-					: ((Long) entity.getProperty(Session.SPEAKER_2));
-			speakerIDArray[2] = ((Long) entity.getProperty(Session.SPEAKER_3) == null) ? 0
-					: ((Long) entity.getProperty(Session.SPEAKER_3));
-
+			Session session = Util.getSessionFromEntity(entity);
+			List<Long> speakerIDList = session.getSpeakerIDList();
 			for (Speaker speaker : speakerList) {
-				if (speakerIDArray[0].equals(speaker.getId())) {
+				if (speakerIDList.get(0) == speaker.getId()) {
 					session.setSpeaker1(speaker);
-				}
-				if (speakerIDArray[1].equals(speaker.getId())) {
+				}else if (speakerIDList.get(1) == speaker.getId()) {
 					session.setSpeaker2(speaker);
-				}
-				if (speakerIDArray[2].equals(speaker.getId())) {
+				}else if (speakerIDList.get(2) == speaker.getId()) {
 					session.setSpeaker3(speaker);
 				}
 			}
@@ -113,15 +86,7 @@ public class BaseResources {
 		List<Speaker> speakerList = new ArrayList<Speaker>();
 
 		for (Entity eSpeaker : eSpeakerList) {
-			Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
-					(String) eSpeaker.getProperty(Speaker.BIO),
-					(String) eSpeaker.getProperty(Speaker.BLOG),
-					(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-					(String) eSpeaker.getProperty(Speaker.GPLUS),
-					(String) eSpeaker.getProperty(Speaker.LANG),
-					(String) eSpeaker.getProperty(Speaker.NAME),
-					(String) eSpeaker.getProperty(Speaker.PHOTO),
-					(String) eSpeaker.getProperty(Speaker.TWITTER));
+			Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
 			speakerList.add(speaker);
 		}
 

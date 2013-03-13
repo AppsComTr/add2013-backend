@@ -47,7 +47,7 @@ public class Speaker {
 	}
 
 	public Speaker(long id, String bio, String blog, String facebook,
-			String gplus, String lang, String name, String photo, String twitter) {
+			String gplus, String lang, String name, String photo, String twitter, List<Long> sessionIDList) {
 		this.id = id;
 		this.bio = bio;
 		this.blog = blog;
@@ -57,6 +57,7 @@ public class Speaker {
 		this.name = name;
 		this.photo = photo;
 		this.twitter = twitter;
+		this.sessionIDList = sessionIDList;
 	}
 
 	public long getId() {
@@ -131,11 +132,11 @@ public class Speaker {
 		this.twitter = twitter;
 	}
 
-	public List<Long> getSessionIDs() {
+	public List<Long> getSessionIDList() {
 		return sessionIDList;
 	}
 
-	public void setSessionIDs(List<Long> sessionIDs) {
+	public void setSessionIDList(List<Long> sessionIDs) {
 		this.sessionIDList = sessionIDs;
 	}
 

@@ -1,6 +1,7 @@
 package org.gdgankara.app.resources;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -17,6 +18,7 @@ import javax.xml.bind.JAXBElement;
 
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.Version;
+import org.gdgankara.app.utils.Util;
 
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -51,6 +53,7 @@ public class SpeakerResource {
 		Version.setVersion();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -59,15 +62,7 @@ public class SpeakerResource {
 
 		Entity eSpeaker = DatastoreServiceFactory.getDatastoreService().get(
 				KeyFactory.createKey(Speaker.KIND, id));
-		Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
-				(String) eSpeaker.getProperty(Speaker.BIO),
-				(String) eSpeaker.getProperty(Speaker.BLOG),
-				(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-				(String) eSpeaker.getProperty(Speaker.GPLUS),
-				(String) eSpeaker.getProperty(Speaker.LANG),
-				(String) eSpeaker.getProperty(Speaker.NAME),
-				(String) eSpeaker.getProperty(Speaker.PHOTO),
-				(String) eSpeaker.getProperty(Speaker.TWITTER));
+		Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
 		return speaker;
 	}
 
