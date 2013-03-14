@@ -20,7 +20,7 @@ public class SessionWrapper {
 		this.version = version;
 		this.sessions = sessions;
 	}
-	
+
 	public SessionWrapper(Version version, Session session) {
 		super();
 		this.version = version;
@@ -50,6 +50,5 @@ public class SessionWrapper {
 	public void setSession(Session session) {
 		this.session = session;
 	}
-	
-	
+
 }

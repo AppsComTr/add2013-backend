@@ -9,6 +9,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.gdgankara.app.AnnouncementWrapper;
+import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
@@ -94,6 +96,22 @@ public class BaseResources {
 		return new SpeakerWrapper(version, speakerList);
 	}
 	
+	@GET
+	@Path("announcements")
+	@Produces(MediaType.APPLICATION_JSON)
+	public AnnouncementWrapper getAnnouncements(){
+		DatastoreService dataStore = DatastoreServiceFactory.getDatastoreService();
+		Query query = new Query(Announcement.KIND);
+		PreparedQuery preparedQuery = dataStore.prepare(query);
+		List<Entity> eAnnouncementList = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+		List<Announcement> announcementList = new ArrayList<Announcement>();
+		for (Entity eAnnouncement : eAnnouncementList) {
+			Announcement announcement = Util.getAnnouncementFromEntity(eAnnouncement);
+			announcementList.add(announcement);
+		}
+		
+		return new AnnouncementWrapper(Version.getVersion(), announcementList);
+	}
 	@GET
 	@Path("version/get")
 	@Produces(MediaType.APPLICATION_JSON)

@@ -1,4 +1,5 @@
 package org.gdgankara.app.resources;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +17,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
+import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
@@ -52,9 +54,6 @@ public class SessionResource {
 		speakerIDList.add(session.getSpeaker2ID());
 		speakerIDList.add(session.getSpeaker3ID());
 
-		eSession = Util.setSessionEntityProperties(eSession, session, speakerIDList);
-		session.setId(dataStore.put(eSession).getId());
-
 		for (int i = 0; i < 3; i++) {
 			Long speakerID = speakerIDList.get(i);
 			if (speakerID != null) {
@@ -73,30 +72,23 @@ public class SessionResource {
 				eSpeaker.setProperty(Speaker.SESSION_LIST,
 						speaker.getSessionIDList());
 				dataStore.put(eSpeaker);
-
-				if (i == 0) {
-					session.setSpeaker1(speaker);
-				} else if (i == 1) {
-					session.setSpeaker2(speaker);
-				} else if (i == 2) {
-					session.setSpeaker3(speaker);
-				}
 			} else {
 				speakerIDList.set(i, (long) 0);
 			}
 		}
+		
+		eSession = Util.setSessionEntityProperties(eSession, session, speakerIDList);
+		session.setId(dataStore.put(eSession).getId());
 
 		Version.setVersion();
 		return session;
 	}
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public SessionWrapper getSessionbyID(@PathParam("id") Long id)
 			throws EntityNotFoundException {
-
 		Entity eSession = DatastoreServiceFactory.getDatastoreService().get(
 				KeyFactory.createKey(Session.KIND, id));
 
@@ -134,7 +126,8 @@ public class SessionResource {
 		DatastoreService dataStore = DatastoreServiceFactory
 				.getDatastoreService();
 		
-		Entity eSession = dataStore.get(KeyFactory.createKey(Session.KIND, id));
+		Entity eSession = new Entity(Session.KIND, id);
+		
 		Session session = jaxbSession.getValue();
 		session.setId(id);
 
@@ -142,10 +135,7 @@ public class SessionResource {
 		speakerIDList.add(session.getSpeaker1ID());
 		speakerIDList.add(session.getSpeaker2ID());
 		speakerIDList.add(session.getSpeaker3ID());
-		
-		eSession = Util.setSessionEntityProperties(eSession, session, speakerIDList);
-		dataStore.put(eSession);
-		
+			
 		for (int i = 0; i < 3; i++) {
 			Long speakerID = speakerIDList.get(i);
 			if (speakerID != null) {
@@ -165,18 +155,13 @@ public class SessionResource {
 				eSpeaker.setProperty(Speaker.SESSION_LIST,
 						speaker.getSessionIDList());
 				dataStore.put(eSpeaker);
-
-				if (i == 0) {
-					session.setSpeaker1(speaker);
-				} else if (i == 1) {
-					session.setSpeaker2(speaker);
-				} else if (i == 2) {
-					session.setSpeaker3(speaker);
-				}
 			} else {
 				speakerIDList.set(i, (long) 0);
 			}
 		}
+		
+		eSession = Util.setSessionEntityProperties(eSession, session, speakerIDList);
+		dataStore.put(eSession);
 
 		Version.setVersion();
 		return session;

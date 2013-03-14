@@ -86,7 +86,7 @@ public class TagResource {
 	}
 
 	@GET
-	@Path("get/{lang}")
+	@Path("/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public TagWrapper getTags(@PathParam("lang") String lang) {
 		DatastoreService dataStore = DatastoreServiceFactory

@@ -20,6 +20,7 @@ public class Session {
 	public static final String SPEAKER_2 = "Speaker2";
 	public static final String SPEAKER_3 = "Speaker3";
 	public static final String SPEAKER_LIST = "Speaker_List";
+	public static final String TAGS = "Tags";
 
 	private long id;
 	private String lang;
@@ -37,13 +38,14 @@ public class Session {
 	private Long Speaker2ID;
 	private Long Speaker3ID;
 	private List<Long> speakerIDList;
+	private String tags;
 	
 	public Session() {
 	}
 	
 	public Session(long id, String lang, String day, String startHour,
 			String endHour, String hall, String title, String description, Boolean isBreak,
-			Speaker speaker1, Speaker speaker2, Speaker speaker3, List<Long> speakerIDList) {
+			Speaker speaker1, Speaker speaker2, Speaker speaker3, List<Long> speakerIDList, String tags) {
 		this.lang = lang;
 		this.id = id;
 		this.day = day;
@@ -57,11 +59,12 @@ public class Session {
 		this.speaker2 = speaker2;
 		this.speaker3 = speaker3;
 		this.speakerIDList = speakerIDList;
+		this.tags = tags;
 	}
 
 	public Session(String lang, String day, String startHour, String endHour,
 			String hall, String title, String description, Boolean isBreak,
-			Speaker speaker1, Speaker speaker2, Speaker speaker3) {
+			Speaker speaker1, Speaker speaker2, Speaker speaker3, String tags) {
 		this.lang = lang;
 		this.day = day;
 		this.startHour = startHour;
@@ -73,10 +76,11 @@ public class Session {
 		this.speaker1 = speaker1;
 		this.speaker2 = speaker2;
 		this.speaker3 = speaker3;
+		this.tags = tags;
 	}
 	
 	public Session(String lang, String day, String startHour, String endHour,
-			String hall, String title, String description, Boolean isBreak, List<Long> speakerIDList){
+			String hall, String title, String description, Boolean isBreak, List<Long> speakerIDList, String tags){
 		this.lang = lang;
 		this.day = day;
 		this.startHour = startHour;
@@ -86,6 +90,7 @@ public class Session {
 		this.description = description;
 		this.isBreak = isBreak;
 		this.speakerIDList = speakerIDList;
+		this.tags = tags;
 	}
 
 	public long getId() {
@@ -215,4 +220,13 @@ public class Session {
 	public void setSpeakerIDList(List<Long> speakerIDs) {
 		this.speakerIDList = speakerIDs;
 	}
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+	
 }

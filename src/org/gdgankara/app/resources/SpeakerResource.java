@@ -16,6 +16,7 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
+import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.Version;
 import org.gdgankara.app.utils.Util;
@@ -53,7 +54,6 @@ public class SpeakerResource {
 		Version.setVersion();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -74,7 +74,7 @@ public class SpeakerResource {
 		DatastoreService dataStore = DatastoreServiceFactory
 				.getDatastoreService();
 		Speaker speaker = jaxbSpeaker.getValue();
-		Entity eSpeaker = dataStore.get(KeyFactory.createKey(Speaker.KIND, id));
+		Entity eSpeaker = new Entity(Speaker.KIND, id);
 		eSpeaker.setProperty(Speaker.BIO, speaker.getBio());
 		eSpeaker.setProperty(Speaker.BLOG, speaker.getBlog());
 		eSpeaker.setProperty(Speaker.FACEBOOK, speaker.getFacebook());

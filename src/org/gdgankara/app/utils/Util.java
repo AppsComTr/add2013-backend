@@ -2,6 +2,7 @@ package org.gdgankara.app.utils;
 
 import java.util.List;
 
+import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.Speaker;
 
@@ -35,8 +36,18 @@ public class Util {
 				(String) eSession.getProperty(Session.TITLE),
 				(String) eSession.getProperty(Session.DESCRIPTION),
 				(Boolean) eSession.getProperty(Session.BREAK), null, null,
-				null, (List<Long>) eSession.getProperty(Session.SPEAKER_LIST));
+				null, (List<Long>) eSession.getProperty(Session.SPEAKER_LIST),
+				(String) eSession.getProperty(Session.TAGS));
 		return session;
+	}
+	
+	public static Announcement getAnnouncementFromEntity(Entity eAnnouncement) {
+		Announcement announcement = new Announcement(eAnnouncement.getKey().getId(), 
+				(String) eAnnouncement.getProperty(Announcement.DESCRIPTION), 
+				(String) eAnnouncement.getProperty(Announcement.IMAGE), 
+				(String) eAnnouncement.getProperty(Announcement.LANG), 
+				(String) eAnnouncement.getProperty(Announcement.LINK));
+		return announcement;
 	}
 
 	public static Entity setSessionEntityProperties(Entity entity,
@@ -50,6 +61,16 @@ public class Util {
 		entity.setProperty(Session.SPEAKER_LIST, speakerIDList);
 		entity.setProperty(Session.TITLE, session.getTitle());
 		entity.setProperty(Session.DESCRIPTION, session.getDescription());
+		entity.setProperty(Session.TAGS, session.getTags());
+		return entity;
+	}
+
+	public static Entity setAnnouncementEntityProperties(Entity entity,
+			Announcement announcement) {
+		entity.setProperty(Announcement.LANG, announcement.getLang());
+		entity.setProperty(Announcement.DESCRIPTION, announcement.getDescription());
+		entity.setProperty(Announcement.IMAGE, announcement.getImage());
+		entity.setProperty(Announcement.LINK, announcement.getLink());
 		return entity;
 	}
 
