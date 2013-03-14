@@ -97,11 +97,12 @@ public class BaseResources {
 	}
 	
 	@GET
-	@Path("announcements")
+	@Path("announcements/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public AnnouncementWrapper getAnnouncements(){
+	public AnnouncementWrapper getAnnouncements(@PathParam("lang") String lang){
 		DatastoreService dataStore = DatastoreServiceFactory.getDatastoreService();
-		Query query = new Query(Announcement.KIND);
+		Query query = new Query(Announcement.KIND).setFilter(new FilterPredicate(
+				Session.LANG, FilterOperator.EQUAL, lang));
 		PreparedQuery preparedQuery = dataStore.prepare(query);
 		List<Entity> eAnnouncementList = preparedQuery.asList(FetchOptions.Builder.withDefaults());
 		List<Announcement> announcementList = new ArrayList<Announcement>();
