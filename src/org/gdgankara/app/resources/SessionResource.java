@@ -53,33 +53,35 @@ public class SessionResource {
 		speakerIDList.add(session.getSpeaker1ID());
 		speakerIDList.add(session.getSpeaker2ID());
 		speakerIDList.add(session.getSpeaker3ID());
-
-		for (int i = 0; i < 3; i++) {
-			Long speakerID = speakerIDList.get(i);
-			if (speakerID != null) {
-				Entity eSpeaker = DatastoreServiceFactory.getDatastoreService()
-						.get(KeyFactory.createKey(Speaker.KIND, speakerID));
-				Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
-
-				List<Long> sessionIDList = speaker.getSessionIDList();
-				if (sessionIDList == null) {
-					sessionIDList = new ArrayList<Long>();
-				}
-
-				sessionIDList.add(session.getId());
-				speaker.setSessionIDList(sessionIDList);
-
-				eSpeaker.setProperty(Speaker.SESSION_LIST,
-						speaker.getSessionIDList());
-				dataStore.put(eSpeaker);
-			} else {
-				speakerIDList.set(i, (long) 0);
-			}
-		}
 		
 		eSession = Util.setSessionEntityProperties(eSession, session, speakerIDList);
 		session.setId(dataStore.put(eSession).getId());
+		
+		if (!session.isBreak()) {
+			for (int i = 0; i < 3; i++) {
+				Long speakerID = speakerIDList.get(i);
+				if (speakerID != null) {
+					Entity eSpeaker = DatastoreServiceFactory.getDatastoreService()
+							.get(KeyFactory.createKey(Speaker.KIND, speakerID));
+					Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
 
+					List<Long> sessionIDList = speaker.getSessionIDList();
+					if (sessionIDList == null) {
+						sessionIDList = new ArrayList<Long>();
+					}
+
+					sessionIDList.add(session.getId());
+					speaker.setSessionIDList(sessionIDList);
+
+					eSpeaker.setProperty(Speaker.SESSION_LIST,
+							speaker.getSessionIDList());
+					dataStore.put(eSpeaker);
+				} else {
+					speakerIDList.set(i, null);
+				}
+			}
+		}
+		
 		Version.setVersion();
 		return session;
 	}
@@ -156,7 +158,7 @@ public class SessionResource {
 						speaker.getSessionIDList());
 				dataStore.put(eSpeaker);
 			} else {
-				speakerIDList.set(i, (long) 0);
+				speakerIDList.set(i, null);
 			}
 		}
 		

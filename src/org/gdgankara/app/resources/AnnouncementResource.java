@@ -13,8 +13,8 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.gdgankara.app.AnnouncementWrapper;
 import org.gdgankara.app.model.Announcement;
+import org.gdgankara.app.model.AnnouncementWrapper;
 import org.gdgankara.app.model.Version;
 import org.gdgankara.app.utils.Util;
 

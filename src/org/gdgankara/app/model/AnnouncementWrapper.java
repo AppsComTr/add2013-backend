@@ -1,11 +1,9 @@
-package org.gdgankara.app;
+package org.gdgankara.app.model;
 
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-import org.gdgankara.app.model.Announcement;
-import org.gdgankara.app.model.Version;
 
 @XmlRootElement
 public class AnnouncementWrapper {

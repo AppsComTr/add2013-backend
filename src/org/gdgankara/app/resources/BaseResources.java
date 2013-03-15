@@ -9,8 +9,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import org.gdgankara.app.AnnouncementWrapper;
 import org.gdgankara.app.model.Announcement;
+import org.gdgankara.app.model.AnnouncementWrapper;
 import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
@@ -59,12 +59,18 @@ public class BaseResources {
 			Session session = Util.getSessionFromEntity(entity);
 			List<Long> speakerIDList = session.getSpeakerIDList();
 			for (Speaker speaker : speakerList) {
-				if (speakerIDList.get(0) == speaker.getId()) {
-					session.setSpeaker1(speaker);
-				}else if (speakerIDList.get(1) == speaker.getId()) {
-					session.setSpeaker2(speaker);
-				}else if (speakerIDList.get(2) == speaker.getId()) {
-					session.setSpeaker3(speaker);
+				if (speakerIDList.get(0) != null) {
+					if (speakerIDList.get(0) == speaker.getId()) {
+						session.setSpeaker1(speaker);
+					}					
+				}else if (speakerIDList.get(1) != null) {
+					if (speakerIDList.get(1) == speaker.getId()) {
+						session.setSpeaker2(speaker);
+					}
+				}else if (speakerIDList.get(2) != null) {
+					if (speakerIDList.get(2) == speaker.getId()) {
+						session.setSpeaker3(speaker);
+					}
 				}
 			}
 			sessionsList.add(session);
@@ -141,58 +147,4 @@ public class BaseResources {
 		}
 		return "hayırlısı be gülüm";
 	}
-
-	String[] hourArray = { "09:00", "09:30", "10:00", "10:30", "11:00",
-			"11:30", "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-			"15:00", "15:30", "16:00", "16:30", "17:00", "17:30", "18:00",
-			"18:30", "19:00", "19:30", "20:00" };
-
-	// @GET
-	// @Path("samples")
-	// @Produces(MediaType.TEXT_PLAIN)
-	// public String samples() {
-	// DatastoreService datastore = DatastoreServiceFactory
-	// .getDatastoreService();
-	// Session session;
-	// Entity eSession;
-	//
-	// try {
-	// for (int i = 0; i < 4; i++) {
-	// session = new Session("tr", "14 Haziran 2013 Cuma",
-	// hourArray[i], hourArray[i + 1], "A", "Baslik_" + i
-	// + "_A_14", "Aciklama_" + i, "Konusmaci_" + i);
-	// eSession = new Entity(Session.KIND);
-	// eSession.setProperty(Session.LANG, session.getLang());
-	// eSession.setProperty(Session.DAY, session.getDay());
-	// eSession.setProperty(Session.START_HOUR, session.getStartHour());
-	// eSession.setProperty(Session.END_HOUR, session.getEndHour());
-	// eSession.setProperty(Session.HALL, session.getHall());
-	// eSession.setProperty(Session.SPEAKER, session.getSpeaker());
-	// eSession.setProperty(Session.TITLE, session.getTitle());
-	// eSession.setProperty(Session.DESCRIPTION,
-	// session.getDescription());
-	// datastore.put(eSession);
-	//
-	// session = new Session("en", "15 June 2013 Friday",
-	// hourArray[i], hourArray[i + 1], "A", "Title_" + i
-	// + "_A_14", "Description_" + i, "Speaker_" + i);
-	// eSession = new Entity(Session.KIND);
-	// eSession.setProperty(Session.LANG, session.getLang());
-	// eSession.setProperty(Session.DAY, session.getDay());
-	// eSession.setProperty(Session.START_HOUR, session.getStartHour());
-	// eSession.setProperty(Session.END_HOUR, session.getEndHour());
-	// eSession.setProperty(Session.HALL, session.getHall());
-	// eSession.setProperty(Session.SPEAKER, session.getSpeaker());
-	// eSession.setProperty(Session.TITLE, session.getTitle());
-	// eSession.setProperty(Session.DESCRIPTION,
-	// session.getDescription());
-	// datastore.put(eSession);
-	// }
-	//
-	// } catch (Exception e) {
-	// return e.toString();
-	// }
-	//
-	// return "well done";
-	// }
 }
