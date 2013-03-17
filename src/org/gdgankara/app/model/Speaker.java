@@ -20,6 +20,7 @@ public class Speaker {
 	public static final String TWITTER = "twitter";
 
 	private List<Long> sessionIDList;
+	private List<Session> sessionList;
 	private long id;
 	private String bio;
 	private String blog;
@@ -138,6 +139,14 @@ public class Speaker {
 
 	public void setSessionIDList(List<Long> sessionIDs) {
 		this.sessionIDList = sessionIDs;
+	}
+
+	public List<Session> getSessionList() {
+		return sessionList;
+	}
+
+	public void setSessionList(List<Session> sessionList) {
+		this.sessionList = sessionList;
 	}
 
 }

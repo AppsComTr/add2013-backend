@@ -12,10 +12,10 @@ import javax.ws.rs.core.MediaType;
 import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.AnnouncementWrapper;
 import org.gdgankara.app.model.Session;
-import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.SpeakerWrapper;
 import org.gdgankara.app.model.Version;
+import org.gdgankara.app.model.VersionWrapper;
 import org.gdgankara.app.utils.Util;
 
 import com.google.appengine.api.datastore.DatastoreService;
@@ -33,7 +33,7 @@ public class BaseResources {
 	@GET
 	@Path("sessions/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SessionWrapper getSessions(@PathParam("lang") String lang) {
+	public VersionWrapper getSessions(@PathParam("lang") String lang) {
 		DatastoreService dataStore = DatastoreServiceFactory
 				.getDatastoreService();
 
@@ -44,7 +44,8 @@ public class BaseResources {
 				.withDefaults());
 		List<Session> sessionsList = new ArrayList<Session>();
 
-		query = new Query(Speaker.KIND);
+		query = new Query(Speaker.KIND).setFilter(new FilterPredicate(
+				Speaker.LANG, FilterOperator.EQUAL, lang));
 		preparedQuery = dataStore.prepare(query);
 		List<Entity> eSpeakerList = preparedQuery.asList(FetchOptions.Builder
 				.withDefaults());
@@ -57,27 +58,11 @@ public class BaseResources {
 
 		for (Entity entity : eSessionList) {
 			Session session = Util.getSessionFromEntity(entity);
-			List<Long> speakerIDList = session.getSpeakerIDList();
-			for (Speaker speaker : speakerList) {
-				if (speakerIDList.get(0) != null) {
-					if (speakerIDList.get(0) == speaker.getId()) {
-						session.setSpeaker1(speaker);
-					}					
-				}else if (speakerIDList.get(1) != null) {
-					if (speakerIDList.get(1) == speaker.getId()) {
-						session.setSpeaker2(speaker);
-					}
-				}else if (speakerIDList.get(2) != null) {
-					if (speakerIDList.get(2) == speaker.getId()) {
-						session.setSpeaker3(speaker);
-					}
-				}
-			}
 			sessionsList.add(session);
 		}
 
 		Version version = Version.getVersion();
-		return new SessionWrapper(version, sessionsList);
+		return new VersionWrapper(version, sessionsList, speakerList);
 	}
 
 	@GET
@@ -101,24 +86,29 @@ public class BaseResources {
 		Version version = Version.getVersion();
 		return new SpeakerWrapper(version, speakerList);
 	}
-	
+
 	@GET
 	@Path("announcements/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public AnnouncementWrapper getAnnouncements(@PathParam("lang") String lang){
-		DatastoreService dataStore = DatastoreServiceFactory.getDatastoreService();
-		Query query = new Query(Announcement.KIND).setFilter(new FilterPredicate(
-				Session.LANG, FilterOperator.EQUAL, lang));
+	public AnnouncementWrapper getAnnouncements(@PathParam("lang") String lang) {
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
+		Query query = new Query(Announcement.KIND)
+				.setFilter(new FilterPredicate(Session.LANG,
+						FilterOperator.EQUAL, lang));
 		PreparedQuery preparedQuery = dataStore.prepare(query);
-		List<Entity> eAnnouncementList = preparedQuery.asList(FetchOptions.Builder.withDefaults());
+		List<Entity> eAnnouncementList = preparedQuery
+				.asList(FetchOptions.Builder.withDefaults());
 		List<Announcement> announcementList = new ArrayList<Announcement>();
 		for (Entity eAnnouncement : eAnnouncementList) {
-			Announcement announcement = Util.getAnnouncementFromEntity(eAnnouncement);
+			Announcement announcement = Util
+					.getAnnouncementFromEntity(eAnnouncement);
 			announcementList.add(announcement);
 		}
-		
+
 		return new AnnouncementWrapper(Version.getVersion(), announcementList);
 	}
+
 	@GET
 	@Path("version/get")
 	@Produces(MediaType.APPLICATION_JSON)

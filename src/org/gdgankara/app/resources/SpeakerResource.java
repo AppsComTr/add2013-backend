@@ -1,7 +1,6 @@
 package org.gdgankara.app.resources;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -16,7 +15,6 @@ import javax.ws.rs.core.Request;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.Version;
 import org.gdgankara.app.utils.Util;
@@ -40,16 +38,9 @@ public class SpeakerResource {
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	public void newSpeakerJson(JAXBElement<Speaker> jaxbSpeaker)
 			throws IOException {
-		Entity eSpeaker = new Entity(Speaker.KIND);
 		Speaker speaker = jaxbSpeaker.getValue();
-		eSpeaker.setProperty(Speaker.BIO, speaker.getBio());
-		eSpeaker.setProperty(Speaker.BLOG, speaker.getBlog());
-		eSpeaker.setProperty(Speaker.FACEBOOK, speaker.getFacebook());
-		eSpeaker.setProperty(Speaker.GPLUS, speaker.getGplus());
-		eSpeaker.setProperty(Speaker.LANG, speaker.getLang());
-		eSpeaker.setProperty(Speaker.NAME, speaker.getName());
-		eSpeaker.setProperty(Speaker.PHOTO, speaker.getPhoto());
-		eSpeaker.setProperty(Speaker.TWITTER, speaker.getTwitter());
+		Entity eSpeaker = new Entity(Speaker.KIND);
+		eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
 		DatastoreServiceFactory.getDatastoreService().put(eSpeaker);
 		Version.setVersion();
 	}
@@ -59,7 +50,6 @@ public class SpeakerResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Speaker getSpeakerByID(@PathParam("id") Long id)
 			throws EntityNotFoundException {
-
 		Entity eSpeaker = DatastoreServiceFactory.getDatastoreService().get(
 				KeyFactory.createKey(Speaker.KIND, id));
 		Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
@@ -75,14 +65,7 @@ public class SpeakerResource {
 				.getDatastoreService();
 		Speaker speaker = jaxbSpeaker.getValue();
 		Entity eSpeaker = new Entity(Speaker.KIND, id);
-		eSpeaker.setProperty(Speaker.BIO, speaker.getBio());
-		eSpeaker.setProperty(Speaker.BLOG, speaker.getBlog());
-		eSpeaker.setProperty(Speaker.FACEBOOK, speaker.getFacebook());
-		eSpeaker.setProperty(Speaker.GPLUS, speaker.getGplus());
-		eSpeaker.setProperty(Speaker.LANG, speaker.getLang());
-		eSpeaker.setProperty(Speaker.NAME, speaker.getName());
-		eSpeaker.setProperty(Speaker.PHOTO, speaker.getPhoto());
-		eSpeaker.setProperty(Speaker.TWITTER, speaker.getTwitter());
+		eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
 		dataStore.put(eSpeaker);
 		Version.setVersion();
 		return speaker;

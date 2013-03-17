@@ -35,8 +35,8 @@ public class Util {
 				(String) eSession.getProperty(Session.HALL),
 				(String) eSession.getProperty(Session.TITLE),
 				(String) eSession.getProperty(Session.DESCRIPTION),
-				(Boolean) eSession.getProperty(Session.BREAK), null, null,
-				null, (List<Long>) eSession.getProperty(Session.SPEAKER_LIST),
+				(Boolean) eSession.getProperty(Session.BREAK),
+				(List<Long>) eSession.getProperty(Session.SPEAKER_LIST),
 				(String) eSession.getProperty(Session.TAGS));
 		return session;
 	}
@@ -51,17 +51,30 @@ public class Util {
 	}
 
 	public static Entity setSessionEntityProperties(Entity entity,
-			Session session, List<Long> speakerIDList) {
+			Session session) {
 		entity.setProperty(Session.LANG, session.getLang());
 		entity.setProperty(Session.DAY, session.getDay());
 		entity.setProperty(Session.START_HOUR, session.getStartHour());
 		entity.setProperty(Session.END_HOUR, session.getEndHour());
 		entity.setProperty(Session.HALL, session.getHall());
 		entity.setProperty(Session.BREAK, session.isBreak());
-		entity.setProperty(Session.SPEAKER_LIST, speakerIDList);
+		entity.setProperty(Session.SPEAKER_LIST, session.getSpeakerIDList());
 		entity.setProperty(Session.TITLE, session.getTitle());
 		entity.setProperty(Session.DESCRIPTION, session.getDescription());
 		entity.setProperty(Session.TAGS, session.getTags());
+		return entity;
+	}
+	
+	public static Entity setSpeakerEntityProperties(Entity entity, Speaker speaker){
+		entity.setProperty(Speaker.BIO, speaker.getBio());
+		entity.setProperty(Speaker.BLOG, speaker.getBlog());
+		entity.setProperty(Speaker.FACEBOOK, speaker.getFacebook());
+		entity.setProperty(Speaker.GPLUS, speaker.getGplus());
+		entity.setProperty(Speaker.LANG, speaker.getLang());
+		entity.setProperty(Speaker.NAME, speaker.getName());
+		entity.setProperty(Speaker.PHOTO, speaker.getPhoto());
+		entity.setProperty(Speaker.TWITTER, speaker.getTwitter());
+		entity.setProperty(Speaker.SESSION_LIST, speaker.getSessionIDList());
 		return entity;
 	}
 
