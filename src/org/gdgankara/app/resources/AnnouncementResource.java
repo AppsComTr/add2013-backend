@@ -42,6 +42,7 @@ public class AnnouncementResource {
 				.getDatastoreService();
 		Announcement announcement = jaxbAnnouncement.getValue();
 		Entity eAnnouncement = new Entity(Announcement.KIND);
+
 		eAnnouncement = Util.setAnnouncementEntityProperties(eAnnouncement,
 				announcement);
 		announcement.setId(dataStore.put(eAnnouncement).getId());
@@ -67,21 +68,24 @@ public class AnnouncementResource {
 	@Path("update/{id}")
 	@Consumes({ MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON })
 	@Produces(MediaType.APPLICATION_JSON)
-	public Announcement updateAnnouncementByID(@PathParam("id") Long id, JAXBElement<Announcement> jaxbAnnouncement) {
-		DatastoreService dataStore = DatastoreServiceFactory.getDatastoreService();
+	public Announcement updateAnnouncementByID(@PathParam("id") Long id,
+			JAXBElement<Announcement> jaxbAnnouncement) {
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
 		Entity eAnnouncement = new Entity(Announcement.KIND, id);
 		Announcement announcement = jaxbAnnouncement.getValue();
-		eAnnouncement = Util.setAnnouncementEntityProperties(eAnnouncement, announcement);
+		eAnnouncement = Util.setAnnouncementEntityProperties(eAnnouncement,
+				announcement);
 		announcement.setId(id);
 		dataStore.put(eAnnouncement);
-		
+
 		Version.setVersion();
 		return announcement;
 	}
-	
+
 	@DELETE
 	@Path("delete/{id}")
-	public void deleteSessionByID(@PathParam("id") Long id) {
+	public void deleteAnnouncementByID(@PathParam("id") Long id) {
 		DatastoreServiceFactory.getDatastoreService().delete(
 				KeyFactory.createKey(Announcement.KIND, id));
 		Version.setVersion();

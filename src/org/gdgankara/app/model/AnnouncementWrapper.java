@@ -16,14 +16,6 @@ public class AnnouncementWrapper {
 		super();
 	}
 
-	public AnnouncementWrapper(Version version,
-			List<Announcement> announcements, Announcement announcement) {
-		super();
-		this.version = version;
-		this.announcements = announcements;
-		this.announcement = announcement;
-	}
-
 	public AnnouncementWrapper(Version version, Announcement announcement) {
 		super();
 		this.version = version;

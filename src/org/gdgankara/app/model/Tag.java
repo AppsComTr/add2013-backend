@@ -3,7 +3,7 @@ package org.gdgankara.app.model;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Tag {
+public class Tag{
 	public static final String KIND = "tags";
 	public static final String LANG = "Lang";
 	public static final String LANG_TR = "tr";
@@ -13,7 +13,7 @@ public class Tag {
 	private long id;
 	private String tags;
 	private String lang;
-	
+		
 	public Tag() {
 	}
 	
