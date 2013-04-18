@@ -16,6 +16,7 @@ import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.SpeakerWrapper;
 import org.gdgankara.app.model.Sponsor;
+import org.gdgankara.app.model.SponsorWrapper;
 import org.gdgankara.app.model.Version;
 import org.gdgankara.app.model.VersionWrapper;
 import org.gdgankara.app.utils.Util;
@@ -150,6 +151,21 @@ public class BaseResources {
 		return new AnnouncementWrapper(Version.getVersion(), announcementList);
 	}
 
+	@GET
+	@Path("sponsors/{lang}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public SponsorWrapper getSponsors(@PathParam("lang") String lang) {
+		List<Entity> eSponsorList = getEntityListQuery(Sponsor.KIND,
+				Sponsor.LANG, lang);
+		List<Sponsor> sponsorList = new ArrayList<Sponsor>();
+		
+		for (Entity entity : eSponsorList) {
+			Sponsor sponsor = Util.getSponsorFromEntity(entity);
+			sponsorList.add(sponsor);
+		}
+		return new SponsorWrapper(Version.getVersion(), sponsorList);
+	}
+	
 	@GET
 	@Path("version/get")
 	@Produces(MediaType.APPLICATION_JSON)

@@ -13,6 +13,7 @@ public class Announcement {
 	public static final String IS_SESSION = "IsSession";
 	public static final String LINK = "Link";
 	public static final String SESSION_ID = "SessionId";
+	public static final String TITLE = "Title";
 
 	private long id;
 	private String description;
@@ -21,23 +22,25 @@ public class Announcement {
 	private String lang;
 	private String link;
 	private Long sessionId;
+	private String title;
 
 	public Announcement() {
 		super();
 	}
 
 	public Announcement(String description, String image, boolean isSession, String lang,
-			String link) {
+			String link, String title) {
 		super();
 		this.description = description;
 		this.image = image;
 		this.isSession = isSession;
 		this.lang = lang;
 		this.link = link;
+		this.title = title;
 	}
 	
 	public Announcement(String description, String image, boolean isSession, String lang,
-			String link, Long sessionId) {
+			String link, Long sessionId, String title) {
 		super();
 		this.description = description;
 		this.image = image;
@@ -45,10 +48,11 @@ public class Announcement {
 		this.lang = lang;
 		this.link = link;
 		this.sessionId = sessionId;
+		this.title = title;
 	}
 
 	public Announcement(long id, String description, String image, boolean isSession, String lang,
-			String link) {
+			String link, String title) {
 		super();
 		this.id = id;
 		this.description = description;
@@ -56,10 +60,11 @@ public class Announcement {
 		this.isSession = isSession;
 		this.lang = lang;
 		this.link = link;
+		this.title = title;
 	}
 	
 	public Announcement(long id, String description, String image, boolean isSession, String lang,
-			String link, Long sessionId) {
+			String link, Long sessionId, String title) {
 		super();
 		this.id = id;
 		this.description = description;
@@ -68,6 +73,7 @@ public class Announcement {
 		this.lang = lang;
 		this.link = link;
 		this.sessionId = sessionId;
+		this.title = title;
 	}
 
 	public long getId() {
@@ -124,6 +130,14 @@ public class Announcement {
 
 	public void setSessionId(Long sessionId) {
 		this.sessionId = sessionId;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 	
 }

@@ -18,6 +18,7 @@ public class Speaker {
 	public static final String NAME = "name";
 	public static final String PHOTO = "photo";
 	public static final String TWITTER = "twitter";
+	public static final String TITLE = "title";
 
 	private List<Long> sessionIDList;
 	private List<Session> sessionList;
@@ -30,13 +31,14 @@ public class Speaker {
 	private String name;
 	private String photo;
 	private String twitter;
+	private String title;
 	
 	public Speaker(){
 		
 	}
 
 	public Speaker(String bio, String blog, String facebook, String gplus,
-			String lang, String name, String photo, String twitter) {
+			String lang, String name, String photo, String twitter, String title) {
 		this.bio = bio;
 		this.blog = blog;
 		this.facebook = facebook;
@@ -45,10 +47,11 @@ public class Speaker {
 		this.name = name;
 		this.photo = photo;
 		this.twitter = twitter;
+		this.title = title;
 	}
 
 	public Speaker(long id, String bio, String blog, String facebook,
-			String gplus, String lang, String name, String photo, String twitter, List<Long> sessionIDList) {
+			String gplus, String lang, String name, String photo, String twitter, List<Long> sessionIDList, String title) {
 		this.id = id;
 		this.bio = bio;
 		this.blog = blog;
@@ -59,6 +62,7 @@ public class Speaker {
 		this.photo = photo;
 		this.twitter = twitter;
 		this.sessionIDList = sessionIDList;
+		this.title = title;
 	}
 
 	public long getId() {
@@ -147,6 +151,14 @@ public class Speaker {
 
 	public void setSessionList(List<Session> sessionList) {
 		this.sessionList = sessionList;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 }

@@ -19,7 +19,8 @@ public class Util {
 				(Boolean) eAnnouncement.getProperty(Announcement.IS_SESSION),
 				(String) eAnnouncement.getProperty(Announcement.LANG),
 				(String) eAnnouncement.getProperty(Announcement.LINK),
-				(Long) eAnnouncement.getProperty(Announcement.SESSION_ID));
+				(Long) eAnnouncement.getProperty(Announcement.SESSION_ID),
+				(String) eAnnouncement.getProperty(Announcement.TITLE));
 		return announcement;
 	}
 
@@ -50,7 +51,8 @@ public class Util {
 				(String) eSpeaker.getProperty(Speaker.NAME),
 				(String) eSpeaker.getProperty(Speaker.PHOTO),
 				(String) eSpeaker.getProperty(Speaker.TWITTER),
-				(List<Long>) eSpeaker.getProperty(Speaker.SESSION_LIST));
+				(List<Long>) eSpeaker.getProperty(Speaker.SESSION_LIST),
+				(String) eSpeaker.getProperty(Speaker.TITLE));
 		return speaker;
 	}
 
@@ -59,7 +61,8 @@ public class Util {
 				(String) eSponsor.getProperty(Sponsor.DESCRIPTION),
 				(String) eSponsor.getProperty(Sponsor.IMAGE),
 				(String) eSponsor.getProperty(Sponsor.LANG),
-				(String) eSponsor.getProperty(Sponsor.LINK));
+				(String) eSponsor.getProperty(Sponsor.LINK),
+				(String) eSponsor.getProperty(Sponsor.NAME));
 		return sponsor;
 	}
 
@@ -72,6 +75,7 @@ public class Util {
 		entity.setProperty(Announcement.IS_SESSION, announcement.isSession());
 		entity.setProperty(Announcement.LINK, announcement.getLink());
 		entity.setProperty(Announcement.SESSION_ID, announcement.getSessionId());
+		entity.setProperty(Announcement.TITLE, announcement.getTitle());
 		return entity;
 	}
 
@@ -101,6 +105,7 @@ public class Util {
 		entity.setProperty(Speaker.PHOTO, speaker.getPhoto());
 		entity.setProperty(Speaker.TWITTER, speaker.getTwitter());
 		entity.setProperty(Speaker.SESSION_LIST, speaker.getSessionIDList());
+		entity.setProperty(Speaker.TITLE, speaker.getTitle());
 		return entity;
 	}
 
@@ -110,6 +115,7 @@ public class Util {
 		entity.setProperty(Sponsor.IMAGE, sponsor.getImage());
 		entity.setProperty(Sponsor.LANG, sponsor.getLang());
 		entity.setProperty(Sponsor.LINK, sponsor.getLink());
+		entity.setProperty(Sponsor.NAME, sponsor.getName());
 		return entity;
 	}
 
