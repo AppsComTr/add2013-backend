@@ -29,14 +29,16 @@ public class Session {
 	private String description;
 	private Boolean isBreak;
 	private List<Long> speakerIDList;
+	private List<String> speakerUrlList;
 	private List<Speaker> speakerList;
 	private String tags;
-	
+
 	public Session() {
 	}
-	
+
 	public Session(long id, String lang, String day, String startHour,
-			String endHour, String hall, String title, String description, Boolean isBreak, List<Long> speakerIDList, String tags) {
+			String endHour, String hall, String title, String description,
+			Boolean isBreak, List<Long> speakerIDList, String tags) {
 		this.lang = lang;
 		this.id = id;
 		this.day = day;
@@ -51,7 +53,8 @@ public class Session {
 	}
 
 	public Session(String lang, String day, String startHour, String endHour,
-			String hall, String title, String description, Boolean isBreak, String tags) {
+			String hall, String title, String description, Boolean isBreak,
+			String tags) {
 		this.lang = lang;
 		this.day = day;
 		this.startHour = startHour;
@@ -62,9 +65,10 @@ public class Session {
 		this.isBreak = isBreak;
 		this.tags = tags;
 	}
-	
+
 	public Session(String lang, String day, String startHour, String endHour,
-			String hall, String title, String description, Boolean isBreak, List<Long> speakerIDList, String tags){
+			String hall, String title, String description, Boolean isBreak,
+			List<Long> speakerIDList, String tags) {
 		this.lang = lang;
 		this.day = day;
 		this.startHour = startHour;
@@ -172,5 +176,13 @@ public class Session {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
-	
+
+	public List<String> getSpeakerUrlList() {
+		return speakerUrlList;
+	}
+
+	public void setSpeakerUrlList(List<String> speakerUrlList) {
+		this.speakerUrlList = speakerUrlList;
+	}
+
 }

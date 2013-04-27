@@ -1,5 +1,10 @@
 package org.gdgankara.app.utils;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.List;
 
 import org.gdgankara.app.model.Announcement;
@@ -8,8 +13,43 @@ import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.Sponsor;
 
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.labs.repackaged.org.json.JSONException;
+import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
 public class Util {
+
+	public static JSONObject doGet(URL url) throws JSONException {
+		JSONObject jsonObject = null;
+		try {
+
+			URLConnection urlConnection = url.openConnection();
+			urlConnection.setConnectTimeout(50000);
+			jsonObject = new JSONObject(
+					convertInputStreamToString(urlConnection.getInputStream()));
+		} catch (Exception e) {
+			System.err.println("errür" + e);
+		}
+		return jsonObject;
+	}
+
+	public static String convertInputStreamToString(InputStream inputStream) {
+		String result = null;
+		try {
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					inputStream), 8);
+			StringBuilder stringBuilder = new StringBuilder();
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				stringBuilder.append(line + "\n");
+			}
+			inputStream.close();
+			result = stringBuilder.toString();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
 
 	public static Announcement getAnnouncementFromEntity(Entity eAnnouncement) {
 		Announcement announcement = new Announcement(eAnnouncement.getKey()
