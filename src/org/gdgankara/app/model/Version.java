@@ -1,5 +1,6 @@
 package org.gdgankara.app.model;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -16,7 +17,8 @@ import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.SortDirection;
 
 @XmlRootElement
-public class Version {
+public class Version implements Serializable {
+	private static final long serialVersionUID = 3164646553975710783L;
 	public static final String KIND = "version";
 	public static final String NUMBER = "number";
 

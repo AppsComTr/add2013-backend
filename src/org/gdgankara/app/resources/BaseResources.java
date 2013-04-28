@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.MediaType;
 import org.gdgankara.app.model.Announcement;
 import org.gdgankara.app.model.AnnouncementWrapper;
 import org.gdgankara.app.model.Session;
+import org.gdgankara.app.model.SessionWrapper;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.SpeakerWrapper;
 import org.gdgankara.app.model.Sponsor;
@@ -32,28 +34,52 @@ import org.jsoup.select.Elements;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
+import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Query.FilterOperator;
 import com.google.appengine.api.datastore.Query.FilterPredicate;
+import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.MemcacheService;
+import com.google.appengine.api.memcache.MemcacheServiceFactory;
 import com.google.appengine.labs.repackaged.org.json.JSONArray;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
 @Path("/")
 public class BaseResources {
+	public static final String WRAPPER_CACHE = "wrapper_cache_";
 
 	@GET
-	@Path("program/{lang}")
+	@Path("program/update/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public VersionWrapper getProgram(@PathParam("lang") String lang) {
+	public VersionWrapper updateProgram(@PathParam("lang") String lang)
+			throws EntityNotFoundException {
 		JSONArray jsonArray;
+		ArrayList<Announcement> announcementList = new ArrayList<Announcement>();
 		ArrayList<Session> sessionList = new ArrayList<Session>();
 		ArrayList<Session> temp14SessionList = new ArrayList<Session>();
 		ArrayList<Session> temp15SessionList = new ArrayList<Session>();
 		ArrayList<Speaker> speakerList = new ArrayList<Speaker>();
 		ArrayList<String> sessionOrderList = new ArrayList<String>();
+		ArrayList<Sponsor> sponsorList = new ArrayList<Sponsor>();
+
+		List<Entity> eAnnouncementList = getEntityListQuery(Announcement.KIND,
+				Announcement.LANG, lang);
+		List<Entity> eSponsorList = getEntityListQuery(Sponsor.KIND,
+				Sponsor.LANG, lang);
+
+		for (Entity entity : eAnnouncementList) {
+			Announcement announcement = Util.getAnnouncementFromEntity(entity);
+			announcementList.add(announcement);
+		}
+
+		for (Entity entity : eSponsorList) {
+			Sponsor sponsor = Util.getSponsorFromEntity(entity);
+			sponsorList.add(sponsor);
+		}
 
 		try {
 			JSONObject speakerObjects = Util
@@ -69,7 +95,7 @@ public class BaseResources {
 				speakerObject = (JSONObject) jsonArray.get(i);
 				speaker = new Speaker();
 				speaker.setId(speakerObject.getInt("id"));
-				speaker.setTitle(speakerObject.getString("title"));
+				speaker.setName(speakerObject.getString("title"));
 				speaker.setUrl(speakerObject.getString("url"));
 				speaker.setLang(lang);
 
@@ -147,7 +173,6 @@ public class BaseResources {
 						session.setHall(hall);
 						session.setBreak(true);
 					} else {
-						// This means unscheduled or break
 						session.setDay(null);
 						session.setStartHour(null);
 						session.setEndHour(null);
@@ -231,6 +256,7 @@ public class BaseResources {
 					breakSession.setEndHour("");
 					breakSession.setDay("14");
 					breakSession.setBreak(true);
+					breakSession.setHall("");
 					if (lang == "tr") {
 						breakSession.setTitle("Ara");
 					} else {
@@ -293,33 +319,89 @@ public class BaseResources {
 			e.printStackTrace();
 		}
 
-		return new VersionWrapper(getVersion(), sessionList, speakerList);
+		// TODO Save lists to db
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
+
+		for (Speaker speaker : speakerList) {
+			Entity eSpeaker = new Entity(Speaker.KIND);
+			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
+			DatastoreServiceFactory.getDatastoreService().put(eSpeaker);
+		}
+
+		for (Session session : sessionList) {
+
+			Entity eSession = new Entity(Session.KIND);
+
+			List<Long> speakerIDList = session.getSpeakerIDList();
+
+			eSession = Util.setSessionEntityProperties(eSession, session);
+			session.setId(dataStore.put(eSession).getId());
+
+			if (!session.isBreak()) {
+				int length = speakerIDList.size();
+				for (int i = 0; i < length; i++) {
+					Long speakerID = speakerIDList.get(i);
+					if (speakerID != null) {
+						Entity eSpeaker = DatastoreServiceFactory
+								.getDatastoreService().get(
+										KeyFactory.createKey(Speaker.KIND,
+												speakerID));
+						Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
+
+						List<Long> sessionIDList = speaker.getSessionIDList();
+						if (sessionIDList == null) {
+							sessionIDList = new ArrayList<Long>();
+						}
+
+						sessionIDList.add(session.getId());
+						speaker.setSessionIDList(sessionIDList);
+
+						eSpeaker.setProperty(Speaker.SESSION_LIST,
+								speaker.getSessionIDList());
+						dataStore.put(eSpeaker);
+					} else {
+						speakerIDList.set(i, null);
+					}
+				}
+			}
+		}
+
+		VersionWrapper versionWrapper = new VersionWrapper(getVersion(), sessionList, speakerList, announcementList, sponsorList);
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+		syncCache.setErrorHandler(ErrorHandlers
+				.getConsistentLogAndContinue(Level.INFO));
+		syncCache.put(WRAPPER_CACHE + lang, versionWrapper);
+		
+		return versionWrapper;
+	}
+
+	@GET
+	@Path("program/{lang}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public VersionWrapper getProgram(@PathParam("lang") String lang)
+			throws EntityNotFoundException {
+		VersionWrapper versionWrapper;
+		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
+		syncCache.setErrorHandler(ErrorHandlers
+				.getConsistentLogAndContinue(Level.INFO));
+		versionWrapper = (VersionWrapper) syncCache.get(WRAPPER_CACHE + lang);
+		if (versionWrapper == null) {
+			versionWrapper = (VersionWrapper) updateProgram(lang);
+		}
+		return versionWrapper;
 	}
 
 	@GET
 	@Path("sessions/{lang}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public VersionWrapper getSessions(@PathParam("lang") String lang) {
-		List<Announcement> announcementList = new ArrayList<Announcement>();
+	public SessionWrapper getSessions(@PathParam("lang") String lang) {
 		List<Session> sessionsList = new ArrayList<Session>();
 		List<Session> tempSessionsList = new ArrayList<Session>();
 		List<String> sessionOrderList = new ArrayList<String>();
-		List<Speaker> speakerList = new ArrayList<Speaker>();
-		List<Sponsor> sponsorList = new ArrayList<Sponsor>();
 
-		List<Entity> eAnnouncementList = getEntityListQuery(Announcement.KIND,
-				Announcement.LANG, lang);
 		List<Entity> eSessionList = getEntityListQuery(Session.KIND,
 				Session.LANG, lang);
-		List<Entity> eSpeakerList = getEntityListQuery(Speaker.KIND,
-				Speaker.LANG, lang);
-		List<Entity> eSponsorList = getEntityListQuery(Sponsor.KIND,
-				Sponsor.LANG, lang);
-
-		for (Entity eSpeaker : eSpeakerList) {
-			Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
-			speakerList.add(speaker);
-		}
 
 		for (Entity entity : eSessionList) {
 			Session session = Util.getSessionFromEntity(entity);
@@ -333,16 +415,6 @@ public class BaseResources {
 			}
 		}
 		Collections.sort(sessionOrderList);
-
-		for (Entity entity : eAnnouncementList) {
-			Announcement announcement = Util.getAnnouncementFromEntity(entity);
-			announcementList.add(announcement);
-		}
-
-		for (Entity entity : eSponsorList) {
-			Sponsor sponsor = Util.getSponsorFromEntity(entity);
-			sponsorList.add(sponsor);
-		}
 
 		for (String startHour : sessionOrderList) {
 			for (Session session : sessionsList) {
@@ -364,8 +436,7 @@ public class BaseResources {
 
 		sessionsList = tempSessionsList;
 		Version version = Version.getVersion();
-		return new VersionWrapper(version, sessionsList, speakerList,
-				announcementList, sponsorList);
+		return new SessionWrapper(version, sessionsList);
 	}
 
 	@GET
@@ -456,18 +527,27 @@ public class BaseResources {
 		return entityList;
 	}
 
-	// @GET
-	// @Path("godkiller")
-	// @Produces(MediaType.TEXT_PLAIN)
-	// public String godKiller() {
-	// DatastoreService dataStore = DatastoreServiceFactory
-	// .getDatastoreService();
-	// Query godKillerQuery = new Query();
-	// PreparedQuery preparedGodKillerQuery = dataStore
-	// .prepare(godKillerQuery);
-	// for (Entity entity : preparedGodKillerQuery.asIterable()) {
-	// dataStore.delete(entity.getKey());
-	// }
-	// return "hayırlısı be gülüm";
-	// }
+	@GET
+	@Path("godkiller/{arg}")
+	@Produces(MediaType.TEXT_PLAIN)
+	public String godKiller(@PathParam("arg") String arg) {
+		if (arg == "db") {
+			DatastoreService dataStore = DatastoreServiceFactory
+					.getDatastoreService();
+			Query godKillerQuery = new Query();
+			PreparedQuery preparedGodKillerQuery = dataStore
+					.prepare(godKillerQuery);
+			for (Entity entity : preparedGodKillerQuery.asIterable()) {
+				dataStore.delete(entity.getKey());
+			}
+		} else if (arg == "cache") {
+			MemcacheService syncCache = MemcacheServiceFactory
+					.getMemcacheService();
+			syncCache.setErrorHandler(ErrorHandlers
+					.getConsistentLogAndContinue(Level.INFO));
+			syncCache.clearAll();
+		}
+
+		return "hayırlısı be gülüm";
+	}
 }

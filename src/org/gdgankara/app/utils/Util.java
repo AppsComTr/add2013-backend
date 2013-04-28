@@ -12,7 +12,9 @@ import org.gdgankara.app.model.Session;
 import org.gdgankara.app.model.Speaker;
 import org.gdgankara.app.model.Sponsor;
 
+import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.Text;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 
@@ -84,15 +86,11 @@ public class Util {
 	public static Speaker getSpeakerFromEntity(Entity eSpeaker) {
 		Speaker speaker = new Speaker(eSpeaker.getKey().getId(),
 				(String) eSpeaker.getProperty(Speaker.BIO),
-				(String) eSpeaker.getProperty(Speaker.BLOG),
-				(String) eSpeaker.getProperty(Speaker.FACEBOOK),
-				(String) eSpeaker.getProperty(Speaker.GPLUS),
 				(String) eSpeaker.getProperty(Speaker.LANG),
 				(String) eSpeaker.getProperty(Speaker.NAME),
 				(String) eSpeaker.getProperty(Speaker.PHOTO),
-				(String) eSpeaker.getProperty(Speaker.TWITTER),
 				(List<Long>) eSpeaker.getProperty(Speaker.SESSION_LIST),
-				(String) eSpeaker.getProperty(Speaker.TITLE));
+				(String) eSpeaker.getProperty(Speaker.URL));
 		return speaker;
 	}
 
@@ -129,23 +127,18 @@ public class Util {
 		entity.setProperty(Session.BREAK, session.isBreak());
 		entity.setProperty(Session.SPEAKER_LIST, session.getSpeakerIDList());
 		entity.setProperty(Session.TITLE, session.getTitle());
-		entity.setProperty(Session.DESCRIPTION, session.getDescription());
-		entity.setProperty(Session.TAGS, session.getTags());
+		entity.setProperty(Session.DESCRIPTION, new Text(session.getDescription()));
 		return entity;
 	}
 
 	public static Entity setSpeakerEntityProperties(Entity entity,
 			Speaker speaker) {
-		entity.setProperty(Speaker.BIO, speaker.getBio());
-		entity.setProperty(Speaker.BLOG, speaker.getBlog());
-		entity.setProperty(Speaker.FACEBOOK, speaker.getFacebook());
-		entity.setProperty(Speaker.GPLUS, speaker.getGplus());
+		entity.setProperty(Speaker.BIO, new Text(speaker.getBio()));
 		entity.setProperty(Speaker.LANG, speaker.getLang());
 		entity.setProperty(Speaker.NAME, speaker.getName());
 		entity.setProperty(Speaker.PHOTO, speaker.getPhoto());
-		entity.setProperty(Speaker.TWITTER, speaker.getTwitter());
 		entity.setProperty(Speaker.SESSION_LIST, speaker.getSessionIDList());
-		entity.setProperty(Speaker.TITLE, speaker.getTitle());
+		entity.setProperty(Speaker.URL, speaker.getUrl());
 		return entity;
 	}
 

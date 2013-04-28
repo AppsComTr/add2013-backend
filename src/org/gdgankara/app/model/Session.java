@@ -1,10 +1,12 @@
 package org.gdgankara.app.model;
 
+import java.io.Serializable;
 import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Session {
+public class Session implements Serializable {
+	private static final long serialVersionUID = 4442016592043277308L;
 	public static final String KIND = "sessions";
 	public static final String LANG = "Lang";
 	public static final String LANG_TR = "tr";

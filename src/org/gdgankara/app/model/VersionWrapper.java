@@ -1,11 +1,13 @@
 package org.gdgankara.app.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class VersionWrapper {
+public class VersionWrapper implements Serializable{
+	private static final long serialVersionUID = 5232163762012466186L;
 	private Version version;
 	private List<Session> sessions;
 	private List<Speaker> speakers;

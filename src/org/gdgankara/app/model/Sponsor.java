@@ -1,9 +1,12 @@
 package org.gdgankara.app.model;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Sponsor {
+public class Sponsor implements Serializable {
+	private static final long serialVersionUID = -3839323744488426823L;
 	public static final String KIND = "sponsors";
 	public static final String LANG = "Lang";
 	public static final String LANG_TR = "tr";

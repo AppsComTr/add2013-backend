@@ -1,9 +1,12 @@
 package org.gdgankara.app.model;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Announcement {
+public class Announcement implements Serializable{
+	private static final long serialVersionUID = -5242875470684972564L;
 	public static final String KIND = "announcements";
 	public static final String LANG = "Lang";
 	public static final String LANG_TR = "tr";
