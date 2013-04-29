@@ -20,6 +20,7 @@ public class Speaker implements Serializable{
 
 	private List<Long> sessionIDList;
 	private long id;
+	private long postId;
 	private String bio;
 	private String lang;
 	private String name;
@@ -102,6 +103,14 @@ public class Speaker implements Serializable{
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public long getPostId() {
+		return postId;
+	}
+
+	public void setPostId(long postId) {
+		this.postId = postId;
 	}
 
 }

@@ -94,7 +94,7 @@ public class BaseResources {
 			for (int i = 0; i < speakerLength; i++) {
 				speakerObject = (JSONObject) jsonArray.get(i);
 				speaker = new Speaker();
-				speaker.setId(speakerObject.getInt("id"));
+				speaker.setPostId(speakerObject.getInt("id"));
 				speaker.setName(speakerObject.getString("title"));
 				speaker.setUrl(speakerObject.getString("url"));
 				speaker.setLang(lang);
@@ -171,7 +171,7 @@ public class BaseResources {
 							hall = "A";
 						}
 						session.setHall(hall);
-						session.setBreak(true);
+						session.setBreak(false);
 					} else {
 						session.setDay(null);
 						session.setStartHour(null);
@@ -212,21 +212,6 @@ public class BaseResources {
 		} catch (ParseException e) {
 			System.out.println(e);
 			e.printStackTrace();
-		}
-
-		for (Session session : sessionList) {
-			List<Long> tempSpeakerIdList = new ArrayList<Long>();
-			if (session.getSpeakerUrlList() != null) {
-				for (String speakerUrl : session.getSpeakerUrlList()) {
-					for (Speaker speaker : speakerList) {
-						if (speaker.getUrl() == speakerUrl
-								|| speaker.getUrl().equals(speakerUrl)) {
-							tempSpeakerIdList.add(speaker.getId());
-						}
-					}
-				}
-				session.setSpeakerIDList(tempSpeakerIdList);
-			}
 		}
 
 		try {
@@ -318,6 +303,21 @@ public class BaseResources {
 			System.out.println(e);
 			e.printStackTrace();
 		}
+		
+		for (Session session : sessionList) {
+			List<Long> tempSpeakerIdList = new ArrayList<Long>();
+			if (session.getSpeakerUrlList() != null) {
+				for (String speakerUrl : session.getSpeakerUrlList()) {
+					for (Speaker speaker : speakerList) {
+						if (speaker.getUrl() == speakerUrl
+								|| speaker.getUrl().equals(speakerUrl)) {
+							tempSpeakerIdList.add(speaker.getPostId());
+						}
+					}
+				}
+				session.setSpeakerIDList(tempSpeakerIdList);
+			}
+		}
 
 		// TODO Save lists to db
 		DatastoreService dataStore = DatastoreServiceFactory
@@ -326,47 +326,55 @@ public class BaseResources {
 		for (Speaker speaker : speakerList) {
 			Entity eSpeaker = new Entity(Speaker.KIND);
 			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
-			DatastoreServiceFactory.getDatastoreService().put(eSpeaker);
+			eSpeaker.getKey().getId();
+			speaker.setId(DatastoreServiceFactory.getDatastoreService().put(eSpeaker).getId());
 		}
-
+		
 		for (Session session : sessionList) {
 
 			Entity eSession = new Entity(Session.KIND);
 
-			List<Long> speakerIDList = session.getSpeakerIDList();
-
+			List<Long> speakerPostIDList = session.getSpeakerIDList();
+			List<Long> speakerIDList = new ArrayList<Long>();
+			
 			eSession = Util.setSessionEntityProperties(eSession, session);
 			session.setId(dataStore.put(eSession).getId());
 
-			if (!session.isBreak()) {
-				int length = speakerIDList.size();
+			if (!session.isBreak() && speakerPostIDList != null) {
+				int length = speakerPostIDList.size();
 				for (int i = 0; i < length; i++) {
-					Long speakerID = speakerIDList.get(i);
-					if (speakerID != null) {
-						Entity eSpeaker = DatastoreServiceFactory
-								.getDatastoreService().get(
-										KeyFactory.createKey(Speaker.KIND,
-												speakerID));
-						Speaker speaker = Util.getSpeakerFromEntity(eSpeaker);
+					Long speakerPostID = speakerPostIDList.get(i);
+					if (speakerPostID != null) {
+						for (Speaker speaker : speakerList) {
+							if (speaker.getPostId() == speakerPostID) {
+								speakerIDList.add(speaker.getId());
+								Entity eSpeaker = DatastoreServiceFactory
+										.getDatastoreService().get(
+												KeyFactory.createKey(Speaker.KIND,
+														speaker.getId()));
+								
+								List<Long> sessionIDList = speaker.getSessionIDList();
+								if (sessionIDList == null) {
+									sessionIDList = new ArrayList<Long>();
+								}
+																
+								sessionIDList.add(session.getId());
+								speaker.setSessionIDList(sessionIDList);
 
-						List<Long> sessionIDList = speaker.getSessionIDList();
-						if (sessionIDList == null) {
-							sessionIDList = new ArrayList<Long>();
+								eSpeaker.setProperty(Speaker.SESSION_LIST,
+										speaker.getSessionIDList());
+								dataStore.put(eSpeaker);
+							}
 						}
-
-						sessionIDList.add(session.getId());
-						speaker.setSessionIDList(sessionIDList);
-
-						eSpeaker.setProperty(Speaker.SESSION_LIST,
-								speaker.getSessionIDList());
-						dataStore.put(eSpeaker);
+						session.setSpeakerIDList(speakerIDList);						
 					} else {
-						speakerIDList.set(i, null);
+						speakerPostIDList.set(i, null);
 					}
 				}
+				speakerIDList = new ArrayList<Long>();
 			}
 		}
-
+		
 		VersionWrapper versionWrapper = new VersionWrapper(getVersion(), sessionList, speakerList, announcementList, sponsorList);
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
 		syncCache.setErrorHandler(ErrorHandlers
