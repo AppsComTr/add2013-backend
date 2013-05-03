@@ -96,11 +96,9 @@ public class Util {
 
 	public static Sponsor getSponsorFromEntity(Entity eSponsor) {
 		Sponsor sponsor = new Sponsor(eSponsor.getKey().getId(),
-				(String) eSponsor.getProperty(Sponsor.DESCRIPTION),
 				(String) eSponsor.getProperty(Sponsor.IMAGE),
-				(String) eSponsor.getProperty(Sponsor.LANG),
 				(String) eSponsor.getProperty(Sponsor.LINK),
-				(String) eSponsor.getProperty(Sponsor.NAME));
+				(String) eSponsor.getProperty(Sponsor.CATEGORY));
 		return sponsor;
 	}
 
@@ -108,11 +106,9 @@ public class Util {
 			Announcement announcement) {
 		entity.setProperty(Announcement.LANG, announcement.getLang());
 		entity.setProperty(Announcement.DESCRIPTION,
-				announcement.getDescription());
+				new Text(announcement.getDescription()));
 		entity.setProperty(Announcement.IMAGE, announcement.getImage());
-		entity.setProperty(Announcement.IS_SESSION, announcement.isSession());
 		entity.setProperty(Announcement.LINK, announcement.getLink());
-		entity.setProperty(Announcement.SESSION_ID, announcement.getSessionId());
 		entity.setProperty(Announcement.TITLE, announcement.getTitle());
 		return entity;
 	}
@@ -127,6 +123,7 @@ public class Util {
 		entity.setProperty(Session.BREAK, session.isBreak());
 		entity.setProperty(Session.SPEAKER_LIST, session.getSpeakerIDList());
 		entity.setProperty(Session.TITLE, session.getTitle());
+		entity.setProperty(Session.TAGS, session.getTags());
 		entity.setProperty(Session.DESCRIPTION, new Text(session.getDescription()));
 		return entity;
 	}
@@ -144,11 +141,9 @@ public class Util {
 
 	public static Entity setSponsorEntityProperties(Entity entity,
 			Sponsor sponsor) {
-		entity.setProperty(Sponsor.DESCRIPTION, sponsor.getDescription());
 		entity.setProperty(Sponsor.IMAGE, sponsor.getImage());
-		entity.setProperty(Sponsor.LANG, sponsor.getLang());
 		entity.setProperty(Sponsor.LINK, sponsor.getLink());
-		entity.setProperty(Sponsor.NAME, sponsor.getName());
+		entity.setProperty(Sponsor.CATEGORY, sponsor.getName());
 		return entity;
 	}
 

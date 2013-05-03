@@ -18,13 +18,14 @@ public class Speaker implements Serializable{
 	public static final String PHOTO = "photo";
 	public static final String URL = "url";
 
-	private List<Long> sessionIDList;
+	
 	private long id;
 	private long postId;
 	private String bio;
 	private String lang;
 	private String name;
 	private String photo;
+	private List<Long> sessionIDList;
 	private String url;
 	
 	public Speaker(){

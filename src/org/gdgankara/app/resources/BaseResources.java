@@ -66,19 +66,72 @@ public class BaseResources {
 		ArrayList<String> sessionOrderList = new ArrayList<String>();
 		ArrayList<Sponsor> sponsorList = new ArrayList<Sponsor>();
 
-		List<Entity> eAnnouncementList = getEntityListQuery(Announcement.KIND,
-				Announcement.LANG, lang);
-		List<Entity> eSponsorList = getEntityListQuery(Sponsor.KIND,
-				Sponsor.LANG, lang);
+		try {
+			JSONObject announcementObjects = Util.doGet(new URL(
+					"http://www.androiddeveloperdays.com/api/get_category_posts/?id=18&lang="
+							+ lang));
+			jsonArray = announcementObjects.getJSONArray("posts");
+			JSONObject announcementObject;
+			Announcement announcement;
+			int announcementLength = jsonArray.length();
 
-		for (Entity entity : eAnnouncementList) {
-			Announcement announcement = Util.getAnnouncementFromEntity(entity);
-			announcementList.add(announcement);
+			for (int i = 0; i < announcementLength; i++) {
+				announcementObject = (JSONObject) jsonArray.get(i);
+				announcement = new Announcement();
+				announcement.setDescription(Jsoup.parse(
+						announcementObject.getString("content")).text());
+				announcement.setLang(lang);
+				announcement.setLink(announcementObject.getString("url"));
+				announcement.setTitle(announcementObject.getString("title"));
+				if (!announcementObject.isNull("attachments")) {
+					String image = ((JSONObject) announcementObject
+							.getJSONArray("attachments").get(0))
+							.getJSONObject("images").getJSONObject("medium")
+							.getString("url");
+					announcement.setImage(image);
+				}
+				announcementList.add(announcement);
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+			e.printStackTrace();
 		}
 
-		for (Entity entity : eSponsorList) {
-			Sponsor sponsor = Util.getSponsorFromEntity(entity);
-			sponsorList.add(sponsor);
+		try {
+			JSONObject sponsorsObject = Util.doGet(new URL(
+					"http://www.androiddeveloperdays.com/sponsors/?json=1"));
+			Element eSponsors = Jsoup.parse(sponsorsObject
+					.getJSONObject("page").getString("content"));
+			int categorySize = eSponsors.select("h3.sponsors").size();
+
+			for (int i = 0; i < categorySize; i++) {
+				Element sponsorsTable = eSponsors.select("table").get(i);
+				String category = eSponsors.select("h3").get(i).text();
+				Sponsor sponsor = null;
+
+				int rowCount = sponsorsTable.select("tr").size();
+				for (int j = 0; j < rowCount; j++) {
+					Element sponsorsRow = sponsorsTable.select("tr").get(j);
+
+					int columnCount = sponsorsRow.select("td").size();
+					for (int k = 0; k < columnCount; k++) {
+						sponsor = new Sponsor();
+						Element eSponsor = sponsorsRow.select("td").get(k);
+						if (eSponsor.getElementsByTag("a").attr("href") != null
+								&& eSponsor.getElementsByTag("a").attr("href") != "") {
+							sponsor.setLink(eSponsor.getElementsByTag("a")
+									.attr("href"));
+							sponsor.setImage(eSponsor.select("a > img").attr(
+									"src"));
+							sponsor.setCategory(category);
+							sponsorList.add(sponsor);
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			System.out.println(e);
+			e.printStackTrace();
 		}
 
 		try {
@@ -133,9 +186,22 @@ public class BaseResources {
 			for (int i = 0; i < postLength; i++) {
 				postObject = (JSONObject) jsonArray.get(i);
 				session = new Session();
+				String tags = "";
 				session.setId(postObject.getInt("id"));
 				session.setTitle(postObject.getString("title"));
 				session.setLang(lang);
+				
+				JSONArray tagsArray = postObject.getJSONArray("tags");
+				if (tagsArray.length() > 0) {
+					for (int j = 0; j < tagsArray.length(); j++) {
+						tags = tags + tagsArray.getJSONObject(j).getString("title") + ",";
+					}
+					session.setTags(tags);
+				}else {
+					session.setTags(null);
+				}
+					
+				
 
 				Element sessionContent = Jsoup.parse(postObject
 						.getString("content"));
@@ -303,7 +369,7 @@ public class BaseResources {
 			System.out.println(e);
 			e.printStackTrace();
 		}
-		
+
 		for (Session session : sessionList) {
 			List<Long> tempSpeakerIdList = new ArrayList<Long>();
 			if (session.getSpeakerUrlList() != null) {
@@ -323,20 +389,32 @@ public class BaseResources {
 		DatastoreService dataStore = DatastoreServiceFactory
 				.getDatastoreService();
 
+		for (Sponsor sponsor : sponsorList) {
+			Entity eSponsor = new Entity(Sponsor.KIND);
+			eSponsor = Util.setSponsorEntityProperties(eSponsor, sponsor);
+			sponsor.setId(dataStore.put(eSponsor).getId());
+		}
+
+		for (Announcement announcement : announcementList) {
+			Entity eAnnouncement = new Entity(Announcement.KIND);
+			eAnnouncement = Util.setAnnouncementEntityProperties(eAnnouncement,
+					announcement);
+			announcement.setId(dataStore.put(eAnnouncement).getId());
+		}
+
 		for (Speaker speaker : speakerList) {
 			Entity eSpeaker = new Entity(Speaker.KIND);
 			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
-			eSpeaker.getKey().getId();
-			speaker.setId(DatastoreServiceFactory.getDatastoreService().put(eSpeaker).getId());
+			speaker.setId(dataStore.put(eSpeaker).getId());
 		}
-		
+
 		for (Session session : sessionList) {
 
 			Entity eSession = new Entity(Session.KIND);
 
 			List<Long> speakerPostIDList = session.getSpeakerIDList();
 			List<Long> speakerIDList = new ArrayList<Long>();
-			
+
 			eSession = Util.setSessionEntityProperties(eSession, session);
 			session.setId(dataStore.put(eSession).getId());
 
@@ -350,14 +428,16 @@ public class BaseResources {
 								speakerIDList.add(speaker.getId());
 								Entity eSpeaker = DatastoreServiceFactory
 										.getDatastoreService().get(
-												KeyFactory.createKey(Speaker.KIND,
+												KeyFactory.createKey(
+														Speaker.KIND,
 														speaker.getId()));
-								
-								List<Long> sessionIDList = speaker.getSessionIDList();
+
+								List<Long> sessionIDList = speaker
+										.getSessionIDList();
 								if (sessionIDList == null) {
 									sessionIDList = new ArrayList<Long>();
 								}
-																
+
 								sessionIDList.add(session.getId());
 								speaker.setSessionIDList(sessionIDList);
 
@@ -366,7 +446,7 @@ public class BaseResources {
 								dataStore.put(eSpeaker);
 							}
 						}
-						session.setSpeakerIDList(speakerIDList);						
+						session.setSpeakerIDList(speakerIDList);
 					} else {
 						speakerPostIDList.set(i, null);
 					}
@@ -374,13 +454,14 @@ public class BaseResources {
 				speakerIDList = new ArrayList<Long>();
 			}
 		}
-		
-		VersionWrapper versionWrapper = new VersionWrapper(getVersion(), sessionList, speakerList, announcementList, sponsorList);
+
+		VersionWrapper versionWrapper = new VersionWrapper(getVersion(),
+				sessionList, speakerList, announcementList, sponsorList);
 		MemcacheService syncCache = MemcacheServiceFactory.getMemcacheService();
 		syncCache.setErrorHandler(ErrorHandlers
 				.getConsistentLogAndContinue(Level.INFO));
 		syncCache.put(WRAPPER_CACHE + lang, versionWrapper);
-		
+
 		return versionWrapper;
 	}
 
@@ -494,11 +575,19 @@ public class BaseResources {
 	}
 
 	@GET
-	@Path("sponsors/{lang}")
+	@Path("sponsors")
 	@Produces(MediaType.APPLICATION_JSON)
-	public SponsorWrapper getSponsors(@PathParam("lang") String lang) {
-		List<Entity> eSponsorList = getEntityListQuery(Sponsor.KIND,
-				Sponsor.LANG, lang);
+	public SponsorWrapper getSponsors() {
+		List<Entity> eSponsorList;
+
+		DatastoreService dataStore = DatastoreServiceFactory
+				.getDatastoreService();
+
+		Query query = new Query(Sponsor.KIND);
+		PreparedQuery preparedQuery = dataStore.prepare(query);
+		eSponsorList = preparedQuery
+				.asList(FetchOptions.Builder.withDefaults());
+
 		List<Sponsor> sponsorList = new ArrayList<Sponsor>();
 
 		for (Entity entity : eSponsorList) {
