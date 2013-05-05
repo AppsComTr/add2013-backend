@@ -18,17 +18,15 @@ public class Sponsor implements Serializable {
 	private String description;
 	private String image;
 	private String link;
-	private String name;
 
 	public Sponsor() {
 		super();
 	}
 
-	public Sponsor(String image, String link, String name) {
+	public Sponsor(String image, String link) {
 		super();
 		this.image = image;
 		this.link = link;
-		this.name = name;
 	}
 
 	public Sponsor(long id, String image, String link,
@@ -37,7 +35,6 @@ public class Sponsor implements Serializable {
 		this.id = id;
 		this.image = image;
 		this.link = link;
-		this.name = name;
 	}
 
 	public long getId() {
@@ -70,14 +67,6 @@ public class Sponsor implements Serializable {
 
 	public void setLink(String link) {
 		this.link = link;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getCategory() {

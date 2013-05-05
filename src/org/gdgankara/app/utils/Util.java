@@ -143,7 +143,7 @@ public class Util {
 			Sponsor sponsor) {
 		entity.setProperty(Sponsor.IMAGE, sponsor.getImage());
 		entity.setProperty(Sponsor.LINK, sponsor.getLink());
-		entity.setProperty(Sponsor.CATEGORY, sponsor.getName());
+		entity.setProperty(Sponsor.CATEGORY, sponsor.getCategory());
 		return entity;
 	}
 
