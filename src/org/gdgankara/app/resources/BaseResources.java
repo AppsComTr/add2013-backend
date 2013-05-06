@@ -154,10 +154,8 @@ public class BaseResources {
 
 				Element speakerContent = Jsoup.parse(speakerObject
 						.getString("content"));
-				speakerContent = speakerContent
-						.removeClass("div.sharedaddy sd-sharing-enabled");
-				speakerContent = speakerContent
-						.removeClass("robots-nocontent sd-block sd-social sd-social-icon-text sd-sharing");
+				speakerContent.select("div.sharedaddy").remove();
+				speakerContent.select("p.session_meta").remove();
 				speaker.setBio(speakerContent.text());
 
 				if (!speakerObject.isNull("thumbnail")) {
@@ -190,18 +188,18 @@ public class BaseResources {
 				session.setId(postObject.getInt("id"));
 				session.setTitle(postObject.getString("title"));
 				session.setLang(lang);
-				
+
 				JSONArray tagsArray = postObject.getJSONArray("tags");
 				if (tagsArray.length() > 0) {
 					for (int j = 0; j < tagsArray.length(); j++) {
-						tags = tags + tagsArray.getJSONObject(j).getString("title") + ",";
+						tags = tags
+								+ tagsArray.getJSONObject(j).getString("title")
+								+ ",";
 					}
 					session.setTags(tags);
-				}else {
+				} else {
 					session.setTags(null);
 				}
-					
-				
 
 				Element sessionContent = Jsoup.parse(postObject
 						.getString("content"));
@@ -257,9 +255,9 @@ public class BaseResources {
 						session.setSpeakerUrlList(speakerUrlList);
 					}
 
-					sessionContent
-							.removeClass("div.sharedaddy sd-sharing-enabled");
-					sessionContent.removeClass("p.session_meta");
+					sessionContent.select("div.sharedaddy").remove();
+					sessionContent.select("p.session_meta").remove();
+
 					session.setDescription(sessionContent.text());
 					sessionList.add(session);
 
