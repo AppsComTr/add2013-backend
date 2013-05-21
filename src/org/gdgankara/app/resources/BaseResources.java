@@ -58,6 +58,7 @@ public class BaseResources {
 	public VersionWrapper updateProgram(@PathParam("lang") String lang)
 			throws EntityNotFoundException {
 		JSONArray jsonArray;
+		int tempSessionId = 0;
 		ArrayList<Announcement> announcementList = new ArrayList<Announcement>();
 		ArrayList<Session> sessionList = new ArrayList<Session>();
 		ArrayList<Session> temp14SessionList = new ArrayList<Session>();
@@ -78,18 +79,23 @@ public class BaseResources {
 			for (int i = 0; i < announcementLength; i++) {
 				announcementObject = (JSONObject) jsonArray.get(i);
 				announcement = new Announcement();
+				announcement.setId(announcementObject.getLong("id"));
 				announcement.setDescription(Jsoup.parse(
 						announcementObject.getString("content")).text());
 				announcement.setLang(lang);
 				announcement.setLink(announcementObject.getString("url"));
 				announcement.setTitle(announcementObject.getString("title"));
-				if (!announcementObject.isNull("attachments")) {
-					String image = ((JSONObject) announcementObject
-							.getJSONArray("attachments").get(0))
-							.getJSONObject("images").getJSONObject("medium")
-							.getString("url");
+				if (announcementObject.has("thumbnail") && !announcementObject.isNull("thumbnail")) {
+					String image = announcementObject.getString("thumbnail");
 					announcement.setImage(image);
 				}
+//				else if (announcementObject.has("attachments") && !announcementObject.isNull("attachments")) {
+//					String image = ((JSONObject) announcementObject
+//							.getJSONArray("attachments").get(0))
+//							.getJSONObject("images").getJSONObject("medium")
+//							.getString("url");
+//					announcement.setImage(image);
+//				}
 				announcementList.add(announcement);
 			}
 		} catch (Exception e) {
@@ -99,11 +105,13 @@ public class BaseResources {
 
 		try {
 			JSONObject sponsorsObject = Util.doGet(new URL(
-					"http://www.androiddeveloperdays.com/sponsors/?json=1"));
+					"http://www.androiddeveloperdays.com/sponsors/?json=1&lang="
+									+ lang));
 			Element eSponsors = Jsoup.parse(sponsorsObject
 					.getJSONObject("page").getString("content"));
 			int categorySize = eSponsors.select("h3.sponsors").size();
-
+			int sponsorId = sponsorsObject.getJSONObject("page").getInt("id");
+			
 			for (int i = 0; i < categorySize; i++) {
 				Element sponsorsTable = eSponsors.select("table").get(i);
 				String category = eSponsors.select("h3").get(i).text();
@@ -119,6 +127,8 @@ public class BaseResources {
 						Element eSponsor = sponsorsRow.select("td").get(k);
 						if (eSponsor.getElementsByTag("a").attr("href") != null
 								&& eSponsor.getElementsByTag("a").attr("href") != "") {
+							sponsorId++;
+							sponsor.setId(((long) sponsorId));
 							sponsor.setLink(eSponsor.getElementsByTag("a")
 									.attr("href"));
 							sponsor.setImage(eSponsor.select("a > img").attr(
@@ -148,6 +158,7 @@ public class BaseResources {
 				speakerObject = (JSONObject) jsonArray.get(i);
 				speaker = new Speaker();
 				speaker.setPostId(speakerObject.getInt("id"));
+				speaker.setId(speakerObject.getInt("id"));
 				speaker.setName(speakerObject.getString("title"));
 				speaker.setUrl(speakerObject.getString("url"));
 				speaker.setLang(lang);
@@ -185,16 +196,16 @@ public class BaseResources {
 				postObject = (JSONObject) jsonArray.get(i);
 				session = new Session();
 				String tags = "";
-				session.setId(postObject.getInt("id"));
+				tempSessionId = postObject.getInt("id");
+				session.setId(tempSessionId);
 				session.setTitle(postObject.getString("title"));
 				session.setLang(lang);
 
 				JSONArray tagsArray = postObject.getJSONArray("tags");
 				if (tagsArray.length() > 0) {
 					for (int j = 0; j < tagsArray.length(); j++) {
-						tags = tags
-								+ tagsArray.getJSONObject(j).getString("title")
-								+ ",";
+						tags += tagsArray.getJSONObject(j).getString("title");
+						tags += j==tagsArray.length()-1 ? "":"," ;
 					}
 					session.setTags(tags);
 				} else {
@@ -384,37 +395,38 @@ public class BaseResources {
 		}
 
 		// TODO Save lists to db
-		DatastoreService dataStore = DatastoreServiceFactory
-				.getDatastoreService();
+//		DatastoreService dataStore = DatastoreServiceFactory
+//				.getDatastoreService();
 
 		for (Sponsor sponsor : sponsorList) {
-			Entity eSponsor = new Entity(Sponsor.KIND);
-			eSponsor = Util.setSponsorEntityProperties(eSponsor, sponsor);
-			sponsor.setId(dataStore.put(eSponsor).getId());
+			sponsor.setId(KeyFactory.createKey(Sponsor.KIND, sponsor.getId()).getId());
 		}
 
 		for (Announcement announcement : announcementList) {
-			Entity eAnnouncement = new Entity(Announcement.KIND);
-			eAnnouncement = Util.setAnnouncementEntityProperties(eAnnouncement,
-					announcement);
-			announcement.setId(dataStore.put(eAnnouncement).getId());
+			announcement.setId(KeyFactory.createKey(Announcement.KIND, announcement.getId()).getId());
 		}
 
 		for (Speaker speaker : speakerList) {
-			Entity eSpeaker = new Entity(Speaker.KIND);
-			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
-			speaker.setId(dataStore.put(eSpeaker).getId());
+//			Entity eSpeaker = new Entity(Speaker.KIND);
+//			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
+//			speaker.setId(dataStore.put(eSpeaker).getId());
+			speaker.setId(KeyFactory.createKey(Speaker.KIND, speaker.getId()).getId());
 		}
 
 		for (Session session : sessionList) {
 
-			Entity eSession = new Entity(Session.KIND);
+//			Entity eSession = new Entity(Session.KIND);
 
 			List<Long> speakerPostIDList = session.getSpeakerIDList();
 			List<Long> speakerIDList = new ArrayList<Long>();
 
-			eSession = Util.setSessionEntityProperties(eSession, session);
-			session.setId(dataStore.put(eSession).getId());
+//			eSession = Util.setSessionEntityProperties(eSession, session);
+//			session.setId(dataStore.put(eSession).getId());
+			if (session.getId() != 0 ) {
+				session.setId(KeyFactory.createKey(Session.KIND, session.getId()).getId());
+			}else {
+				session.setId(KeyFactory.createKey(Session.KIND, tempSessionId++).getId());
+			}
 
 			if (!session.isBreak() && speakerPostIDList != null) {
 				int length = speakerPostIDList.size();
@@ -424,11 +436,11 @@ public class BaseResources {
 						for (Speaker speaker : speakerList) {
 							if (speaker.getPostId() == speakerPostID) {
 								speakerIDList.add(speaker.getId());
-								Entity eSpeaker = DatastoreServiceFactory
-										.getDatastoreService().get(
-												KeyFactory.createKey(
-														Speaker.KIND,
-														speaker.getId()));
+//								Entity eSpeaker = DatastoreServiceFactory
+//										.getDatastoreService().get(
+//												KeyFactory.createKey(
+//														Speaker.KIND,
+//														speaker.getId()));
 
 								List<Long> sessionIDList = speaker
 										.getSessionIDList();
@@ -439,9 +451,9 @@ public class BaseResources {
 								sessionIDList.add(session.getId());
 								speaker.setSessionIDList(sessionIDList);
 
-								eSpeaker.setProperty(Speaker.SESSION_LIST,
-										speaker.getSessionIDList());
-								dataStore.put(eSpeaker);
+//								eSpeaker.setProperty(Speaker.SESSION_LIST,
+//										speaker.getSessionIDList());
+//								dataStore.put(eSpeaker);
 							}
 						}
 						session.setSpeakerIDList(speakerIDList);
