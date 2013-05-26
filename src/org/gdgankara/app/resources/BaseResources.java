@@ -84,18 +84,17 @@ public class BaseResources {
 						announcementObject.getString("content")).text());
 				announcement.setLang(lang);
 				announcement.setLink(announcementObject.getString("url"));
-				announcement.setTitle(announcementObject.getString("title"));
-				if (announcementObject.has("thumbnail") && !announcementObject.isNull("thumbnail")) {
+				announcement.setTitle(Jsoup.parse(
+						announcementObject.getString("title")).text());
+				JSONArray attachmentArray = (JSONArray) announcementObject.getJSONArray("attachments");
+				if (attachmentArray.length() > 0) {
+					String image = ((JSONObject) attachmentArray.get(0)).getString("url");
+					announcement.setImage(image);
+				}else if (announcementObject.has("thumbnail")
+						&& !announcementObject.isNull("thumbnail")) {
 					String image = announcementObject.getString("thumbnail");
 					announcement.setImage(image);
 				}
-//				else if (announcementObject.has("attachments") && !announcementObject.isNull("attachments")) {
-//					String image = ((JSONObject) announcementObject
-//							.getJSONArray("attachments").get(0))
-//							.getJSONObject("images").getJSONObject("medium")
-//							.getString("url");
-//					announcement.setImage(image);
-//				}
 				announcementList.add(announcement);
 			}
 		} catch (Exception e) {
@@ -106,12 +105,12 @@ public class BaseResources {
 		try {
 			JSONObject sponsorsObject = Util.doGet(new URL(
 					"http://www.androiddeveloperdays.com/sponsors/?json=1&lang="
-									+ lang));
+							+ lang));
 			Element eSponsors = Jsoup.parse(sponsorsObject
 					.getJSONObject("page").getString("content"));
 			int categorySize = eSponsors.select("h3.sponsors").size();
 			int sponsorId = sponsorsObject.getJSONObject("page").getInt("id");
-			
+
 			for (int i = 0; i < categorySize; i++) {
 				Element sponsorsTable = eSponsors.select("table").get(i);
 				String category = eSponsors.select("h3").get(i).text();
@@ -159,7 +158,8 @@ public class BaseResources {
 				speaker = new Speaker();
 				speaker.setPostId(speakerObject.getInt("id"));
 				speaker.setId(speakerObject.getInt("id"));
-				speaker.setName(speakerObject.getString("title"));
+				speaker.setName(Jsoup.parse(speakerObject.getString("title"))
+						.text());
 				speaker.setUrl(speakerObject.getString("url"));
 				speaker.setLang(lang);
 
@@ -168,8 +168,12 @@ public class BaseResources {
 				speakerContent.select("div.sharedaddy").remove();
 				speakerContent.select("p.session_meta").remove();
 				speaker.setBio(speakerContent.text());
-
-				if (!speakerObject.isNull("thumbnail")) {
+				
+				JSONArray attachmentArray = (JSONArray) speakerObject.getJSONArray("attachments");
+				if (attachmentArray.length() > 0) {
+					String speakerThumbnail = ((JSONObject) attachmentArray.get(0)).getJSONObject("images").getJSONObject("medium").getString("url");
+					speaker.setPhoto(speakerThumbnail);
+				}else if (!speakerObject.isNull("thumbnail")) {
 					speaker.setPhoto(speakerObject.getString("thumbnail"));
 				} else {
 					speaker.setPhoto("http://www.gdgankara.org/wp-content/themes/alltuts2/images/ico_author.png");
@@ -196,16 +200,17 @@ public class BaseResources {
 				postObject = (JSONObject) jsonArray.get(i);
 				session = new Session();
 				String tags = "";
-				tempSessionId = postObject.getInt("id");
-				session.setId(tempSessionId);
-				session.setTitle(postObject.getString("title"));
+				tempSessionId = postObject.getInt("id") + 2000;
+				session.setId(postObject.getInt("id"));
+				session.setTitle(Jsoup.parse(postObject.getString("title"))
+						.text());
 				session.setLang(lang);
 
 				JSONArray tagsArray = postObject.getJSONArray("tags");
 				if (tagsArray.length() > 0) {
 					for (int j = 0; j < tagsArray.length(); j++) {
 						tags += tagsArray.getJSONObject(j).getString("title");
-						tags += j==tagsArray.length()-1 ? "":"," ;
+						tags += j == tagsArray.length() - 1 ? "" : ",";
 					}
 					session.setTags(tags);
 				} else {
@@ -219,8 +224,7 @@ public class BaseResources {
 							.split(",");
 
 					if (date.length > 1) {
-						session.setDay(date[0] + " ," + date[1] + " ,"
-								+ date[2]);
+						session.setDay(date[0] + "," + date[1] + "," + date[2]);
 						session.setStartHour(date[3].split("–")[0].trim());
 						session.setEndHour(date[3].split("–")[1].trim());
 
@@ -260,10 +264,20 @@ public class BaseResources {
 						List<String> speakerUrlList = new ArrayList<String>();
 						Elements speakers = sessionContent
 								.select("span.speakers > a");
-						for (Element element : speakers) {
-							speakerUrlList.add(element.attr("href"));
+//						if (session.getId() == 915) {
+//							for (Element element : speakers) {
+//								System.out.println(element.attr("href"));
+//							}
+//						}
+						if (session.getId() != 925) {
+							for (Element element : speakers) {
+								speakerUrlList.add(element.attr("href"));
+							}
+
+							session.setSpeakerUrlList(speakerUrlList);
+						} else {
+							session.setSpeakerList(null);
 						}
-						session.setSpeakerUrlList(speakerUrlList);
 					}
 
 					sessionContent.select("div.sharedaddy").remove();
@@ -278,6 +292,7 @@ public class BaseResources {
 					}
 				}
 			}
+
 		} catch (MalformedURLException e) {
 			System.out.println(e);
 			e.printStackTrace();
@@ -300,11 +315,20 @@ public class BaseResources {
 					.first();
 
 			Elements nonSessionElements = rawTimeTable.getElementsByTag("tr");
+			String dayRow = "";
 
 			for (Element nonSessionElement : nonSessionElements) {
 				breakSession = new Session();
-
+				if (nonSessionElement.getElementsByClass("day").size() > 0) {
+					if (nonSessionElement.getElementsByClass("day").get(0)
+							.getElementsByTag("td").text().contains("14")) {
+						dayRow = "14";
+					} else {
+						dayRow = "15";
+					}
+				}
 				if (nonSessionElement.getElementsByClass("non-session").size() > 0) {
+					breakSession.setDay(dayRow);
 					breakSession.setStartHour(nonSessionElement
 							.getElementsByClass("time_slot").get(0)
 							.getElementsByTag("a").text());
@@ -314,16 +338,30 @@ public class BaseResources {
 					breakSession.setStartHour(dateFormat.format(time)
 							.toLowerCase());
 					breakSession.setEndHour("");
-					breakSession.setDay("14");
 					breakSession.setBreak(true);
 					breakSession.setHall("");
-					if (lang == "tr") {
-						breakSession.setTitle("Ara");
-					} else {
-						breakSession.setTitle("Break");
-					}
 					breakSession.setLang(lang);
 					breakSession.setDescription("");
+
+					if (breakSession.getStartHour().equals("09:00am")) {
+						if (lang.equals("tr")) {
+							breakSession.setTitle("Kayıt");
+						} else {
+							breakSession.setTitle("Registration");
+						}
+					} else if (breakSession.getStartHour().equals("12:30pm")) {
+						if (lang.equals("tr")) {
+							breakSession.setTitle("Öğle Arası");
+						} else {
+							breakSession.setTitle("Lunch");
+						}
+					} else {
+						if (lang.equals("tr")) {
+							breakSession.setTitle("Ara");
+						} else {
+							breakSession.setTitle("Break");
+						}
+					}
 
 					if (breakSession.getStartHour() != null) {
 						if (!sessionOrderList.contains(breakSession
@@ -351,19 +389,20 @@ public class BaseResources {
 			sessionOrderList = new ArrayList<String>();
 			for (Date date : dateList) {
 				SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
-				sessionOrderList.add(dateFormat.format(date).toLowerCase());
+				if (!sessionOrderList.contains(dateFormat.format(date)
+						.toLowerCase())) {
+					sessionOrderList.add(dateFormat.format(date).toLowerCase());
+				}
 			}
 
 			for (String startHour : sessionOrderList) {
 				for (Session session : sessionList) {
 					if (session.getDay() != null) {
 						if (session.getDay().contains("14")
-								&& !temp14SessionList.contains(session)
 								&& (session.getStartHour() == startHour || session
 										.getStartHour().equals(startHour))) {
 							temp14SessionList.add(session);
 						} else if (session.getDay().contains("15")
-								&& !temp15SessionList.contains(session)
 								&& (session.getStartHour() == startHour || session
 										.getStartHour().equals(startHour))) {
 							temp15SessionList.add(session);
@@ -373,7 +412,6 @@ public class BaseResources {
 			}
 			sessionList = temp14SessionList;
 			sessionList.addAll(temp15SessionList);
-
 		} catch (Exception e) {
 			System.out.println(e);
 			e.printStackTrace();
@@ -381,51 +419,46 @@ public class BaseResources {
 
 		for (Session session : sessionList) {
 			List<Long> tempSpeakerIdList = new ArrayList<Long>();
-			if (session.getSpeakerUrlList() != null) {
+			if (session.getSpeakerUrlList() != null && session.getId() != 925) {
 				for (String speakerUrl : session.getSpeakerUrlList()) {
 					for (Speaker speaker : speakerList) {
 						if (speaker.getUrl() == speakerUrl
 								|| speaker.getUrl().equals(speakerUrl)) {
-							tempSpeakerIdList.add(speaker.getPostId());
+							tempSpeakerIdList.add(speaker.getId());
 						}
 					}
 				}
 				session.setSpeakerIDList(tempSpeakerIdList);
 			}
 		}
-
-		// TODO Save lists to db
-//		DatastoreService dataStore = DatastoreServiceFactory
-//				.getDatastoreService();
+		
+		//
 
 		for (Sponsor sponsor : sponsorList) {
-			sponsor.setId(KeyFactory.createKey(Sponsor.KIND, sponsor.getId()).getId());
+			sponsor.setId(KeyFactory.createKey(Sponsor.KIND, sponsor.getId())
+					.getId());
 		}
 
 		for (Announcement announcement : announcementList) {
-			announcement.setId(KeyFactory.createKey(Announcement.KIND, announcement.getId()).getId());
+			announcement.setId(KeyFactory.createKey(Announcement.KIND,
+					announcement.getId()).getId());
 		}
 
 		for (Speaker speaker : speakerList) {
-//			Entity eSpeaker = new Entity(Speaker.KIND);
-//			eSpeaker = Util.setSpeakerEntityProperties(eSpeaker, speaker);
-//			speaker.setId(dataStore.put(eSpeaker).getId());
-			speaker.setId(KeyFactory.createKey(Speaker.KIND, speaker.getId()).getId());
+			speaker.setId(KeyFactory.createKey(Speaker.KIND, speaker.getId())
+					.getId());
 		}
 
 		for (Session session : sessionList) {
-
-//			Entity eSession = new Entity(Session.KIND);
-
 			List<Long> speakerPostIDList = session.getSpeakerIDList();
 			List<Long> speakerIDList = new ArrayList<Long>();
 
-//			eSession = Util.setSessionEntityProperties(eSession, session);
-//			session.setId(dataStore.put(eSession).getId());
-			if (session.getId() != 0 ) {
-				session.setId(KeyFactory.createKey(Session.KIND, session.getId()).getId());
-			}else {
-				session.setId(KeyFactory.createKey(Session.KIND, tempSessionId++).getId());
+			if (session.getId() != 0) {
+				session.setId(KeyFactory.createKey(Session.KIND,
+						session.getId()).getId());
+			} else {
+				session.setId(KeyFactory.createKey(Session.KIND,
+						tempSessionId++).getId());
 			}
 
 			if (!session.isBreak() && speakerPostIDList != null) {
@@ -436,11 +469,6 @@ public class BaseResources {
 						for (Speaker speaker : speakerList) {
 							if (speaker.getPostId() == speakerPostID) {
 								speakerIDList.add(speaker.getId());
-//								Entity eSpeaker = DatastoreServiceFactory
-//										.getDatastoreService().get(
-//												KeyFactory.createKey(
-//														Speaker.KIND,
-//														speaker.getId()));
 
 								List<Long> sessionIDList = speaker
 										.getSessionIDList();
@@ -450,10 +478,6 @@ public class BaseResources {
 
 								sessionIDList.add(session.getId());
 								speaker.setSessionIDList(sessionIDList);
-
-//								eSpeaker.setProperty(Speaker.SESSION_LIST,
-//										speaker.getSessionIDList());
-//								dataStore.put(eSpeaker);
 							}
 						}
 						session.setSpeakerIDList(speakerIDList);
@@ -634,27 +658,27 @@ public class BaseResources {
 		return entityList;
 	}
 
-	@GET
-	@Path("godkiller/{arg}")
-	@Produces(MediaType.TEXT_PLAIN)
-	public String godKiller(@PathParam("arg") String arg) {
-		if (arg == "db") {
-			DatastoreService dataStore = DatastoreServiceFactory
-					.getDatastoreService();
-			Query godKillerQuery = new Query();
-			PreparedQuery preparedGodKillerQuery = dataStore
-					.prepare(godKillerQuery);
-			for (Entity entity : preparedGodKillerQuery.asIterable()) {
-				dataStore.delete(entity.getKey());
-			}
-		} else if (arg == "cache") {
-			MemcacheService syncCache = MemcacheServiceFactory
-					.getMemcacheService();
-			syncCache.setErrorHandler(ErrorHandlers
-					.getConsistentLogAndContinue(Level.INFO));
-			syncCache.clearAll();
-		}
-
-		return "hayırlısı be gülüm";
-	}
+	// @GET
+	// @Path("godkiller/{arg}")
+	// @Produces(MediaType.TEXT_PLAIN)
+	// public String godKiller(@PathParam("arg") String arg) {
+	// if (arg == "db") {
+	// DatastoreService dataStore = DatastoreServiceFactory
+	// .getDatastoreService();
+	// Query godKillerQuery = new Query();
+	// PreparedQuery preparedGodKillerQuery = dataStore
+	// .prepare(godKillerQuery);
+	// for (Entity entity : preparedGodKillerQuery.asIterable()) {
+	// dataStore.delete(entity.getKey());
+	// }
+	// } else if (arg == "cache") {
+	// MemcacheService syncCache = MemcacheServiceFactory
+	// .getMemcacheService();
+	// syncCache.setErrorHandler(ErrorHandlers
+	// .getConsistentLogAndContinue(Level.INFO));
+	// syncCache.clearAll();
+	// }
+	//
+	// return "hayırlısı be gülüm";
+	// }
 }
