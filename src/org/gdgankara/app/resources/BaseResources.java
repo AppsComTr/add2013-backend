@@ -271,7 +271,13 @@ public class BaseResources {
 						Elements speakers = sessionContent
 								.select("span.speakers > a");
 						for (Element element : speakers) {
-							speakerUrlList.add(element.attr("href"));
+							String url = element.attr("href");
+							if (lang.toString().equals("tr")) {
+								url = url.replace("/tr/", "/");
+								speakerUrlList.add(url);
+							}else {
+								speakerUrlList.add(url);
+							}
 						}
 
 						session.setSpeakerUrlList(speakerUrlList);
