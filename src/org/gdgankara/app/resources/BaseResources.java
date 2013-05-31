@@ -61,6 +61,7 @@ public class BaseResources {
 		int tempSessionId = 0;
 		ArrayList<Announcement> announcementList = new ArrayList<Announcement>();
 		ArrayList<Session> sessionList = new ArrayList<Session>();
+		ArrayList<Session> breakSessionList = new ArrayList<Session>();
 		ArrayList<Session> temp14SessionList = new ArrayList<Session>();
 		ArrayList<Session> temp15SessionList = new ArrayList<Session>();
 		ArrayList<Speaker> speakerList = new ArrayList<Speaker>();
@@ -86,11 +87,13 @@ public class BaseResources {
 				announcement.setLink(announcementObject.getString("url"));
 				announcement.setTitle(Jsoup.parse(
 						announcementObject.getString("title")).text());
-				JSONArray attachmentArray = (JSONArray) announcementObject.getJSONArray("attachments");
+				JSONArray attachmentArray = (JSONArray) announcementObject
+						.getJSONArray("attachments");
 				if (attachmentArray.length() > 0) {
-					String image = ((JSONObject) attachmentArray.get(0)).getString("url");
+					String image = ((JSONObject) attachmentArray.get(0))
+							.getString("url");
 					announcement.setImage(image);
-				}else if (announcementObject.has("thumbnail")
+				} else if (announcementObject.has("thumbnail")
 						&& !announcementObject.isNull("thumbnail")) {
 					String image = announcementObject.getString("thumbnail");
 					announcement.setImage(image);
@@ -168,12 +171,15 @@ public class BaseResources {
 				speakerContent.select("div.sharedaddy").remove();
 				speakerContent.select("p.session_meta").remove();
 				speaker.setBio(speakerContent.text());
-				
-				JSONArray attachmentArray = (JSONArray) speakerObject.getJSONArray("attachments");
+
+				JSONArray attachmentArray = (JSONArray) speakerObject
+						.getJSONArray("attachments");
 				if (attachmentArray.length() > 0) {
-					String speakerThumbnail = ((JSONObject) attachmentArray.get(0)).getJSONObject("images").getJSONObject("medium").getString("url");
+					String speakerThumbnail = ((JSONObject) attachmentArray
+							.get(0)).getJSONObject("images")
+							.getJSONObject("medium").getString("url");
 					speaker.setPhoto(speakerThumbnail);
-				}else if (!speakerObject.isNull("thumbnail")) {
+				} else if (!speakerObject.isNull("thumbnail")) {
 					speaker.setPhoto(speakerObject.getString("thumbnail"));
 				} else {
 					speaker.setPhoto("http://www.gdgankara.org/wp-content/themes/alltuts2/images/ico_author.png");
@@ -264,20 +270,11 @@ public class BaseResources {
 						List<String> speakerUrlList = new ArrayList<String>();
 						Elements speakers = sessionContent
 								.select("span.speakers > a");
-//						if (session.getId() == 915) {
-//							for (Element element : speakers) {
-//								System.out.println(element.attr("href"));
-//							}
-//						}
-						if (session.getId() != 925) {
-							for (Element element : speakers) {
-								speakerUrlList.add(element.attr("href"));
-							}
-
-							session.setSpeakerUrlList(speakerUrlList);
-						} else {
-							session.setSpeakerList(null);
+						for (Element element : speakers) {
+							speakerUrlList.add(element.attr("href"));
 						}
+
+						session.setSpeakerUrlList(speakerUrlList);
 					}
 
 					sessionContent.select("div.sharedaddy").remove();
@@ -306,120 +303,110 @@ public class BaseResources {
 
 		try {
 			Session breakSession;
+			String day = "";
+
 			Element rawTimeTable = Jsoup
 					.parse(Util
 							.doGet(new URL(
-									"http://www.androiddeveloperdays.com/sessions/opening/?json=1&lang="
-											+ lang)).getJSONObject("post")
+									"http://www.androiddeveloperdays.com/schedule/?json=1&lang="
+											+ lang)).getJSONObject("page")
 							.getString("content")).select("table.grid tbody")
 					.first();
 
-			Elements nonSessionElements = rawTimeTable.getElementsByTag("tr");
-			String dayRow = "";
+			Elements sessionElements = rawTimeTable.getElementsByTag("tr");
+			SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
 
-			for (Element nonSessionElement : nonSessionElements) {
-				breakSession = new Session();
-				if (nonSessionElement.getElementsByClass("day").size() > 0) {
-					if (nonSessionElement.getElementsByClass("day").get(0)
-							.getElementsByTag("td").text().contains("14")) {
-						dayRow = "14";
+			for (Element sessionElement : sessionElements) {
+				if (sessionElement.getElementsByClass("day").size() > 0) {
+					if (sessionElement.text().contains("14")) {
+						day = "14";
 					} else {
-						dayRow = "15";
+						day = "15";
 					}
-				}
-				if (nonSessionElement.getElementsByClass("non-session").size() > 0) {
-					breakSession.setDay(dayRow);
-					breakSession.setStartHour(nonSessionElement
-							.getElementsByClass("time_slot").get(0)
-							.getElementsByTag("a").text());
-					SimpleDateFormat dateFormat = new SimpleDateFormat(
-							"hh:mmaa");
-					Date time = dateFormat.parse(breakSession.getStartHour());
-					breakSession.setStartHour(dateFormat.format(time)
-							.toLowerCase());
-					breakSession.setEndHour("");
+				} else if (sessionElement.getElementsByClass("non-session")
+						.size() > 0) {
+					breakSession = new Session();
 					breakSession.setBreak(true);
+					String[] hours = sessionElement.select("td.time_slot > a")
+							.text().trim().split("–");
+					breakSession.setStartHour(dateFormat.format(
+							dateFormat.parse(hours[0])).toLowerCase());
+					breakSession.setEndHour(dateFormat.format(
+							dateFormat.parse(hours[1])).toLowerCase());
+
+					breakSession.setTitle(sessionElement.select(
+							"td.sessions > p > a").text());
 					breakSession.setHall("");
 					breakSession.setLang(lang);
 					breakSession.setDescription("");
+					breakSession.setDay(day);
+					breakSession.setTags("");
+					breakSession.setUrl("");
 
-					if (breakSession.getStartHour().equals("09:00am")) {
-						if (lang.equals("tr")) {
-							breakSession.setTitle("Kayıt");
-						} else {
-							breakSession.setTitle("Registration");
-						}
-					} else if (breakSession.getStartHour().equals("12:30pm")) {
-						if (lang.equals("tr")) {
-							breakSession.setTitle("Öğle Arası");
-						} else {
-							breakSession.setTitle("Lunch");
+					if (lang.equals("tr")) {
+						if (!breakSession.getTitle().toString().equals("Kayıt")) {
+							breakSessionList.add(breakSession);
+							sessionOrderList.add(breakSession.getStartHour());
 						}
 					} else {
-						if (lang.equals("tr")) {
-							breakSession.setTitle("Ara");
-						} else {
-							breakSession.setTitle("Break");
-						}
-					}
-
-					if (breakSession.getStartHour() != null) {
-						if (!sessionOrderList.contains(breakSession
-								.getStartHour())) {
+						if (!breakSession.getTitle().toString()
+								.equals("Registration")) {
+							breakSessionList.add(breakSession);
 							sessionOrderList.add(breakSession.getStartHour());
 						}
 					}
-					sessionList.add(breakSession);
+
 				}
 			}
 
-			ArrayList<Date> dateList = new ArrayList<Date>();
-			for (String string : sessionOrderList) {
-				try {
-					SimpleDateFormat dateFormat = new SimpleDateFormat(
-							"hh:mmaa");
-					Date date = dateFormat.parse(string);
-					dateList.add(date);
-				} catch (ParseException e) {
-					System.out.println(e);
-					e.printStackTrace();
-				}
-			}
-			Collections.sort(dateList);
-			sessionOrderList = new ArrayList<String>();
-			for (Date date : dateList) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
-				if (!sessionOrderList.contains(dateFormat.format(date)
-						.toLowerCase())) {
-					sessionOrderList.add(dateFormat.format(date).toLowerCase());
-				}
-			}
-
-			for (String startHour : sessionOrderList) {
-				for (Session session : sessionList) {
-					if (session.getDay() != null) {
-						if (session.getDay().contains("14")
-								&& (session.getStartHour() == startHour || session
-										.getStartHour().equals(startHour))) {
-							temp14SessionList.add(session);
-						} else if (session.getDay().contains("15")
-								&& (session.getStartHour() == startHour || session
-										.getStartHour().equals(startHour))) {
-							temp15SessionList.add(session);
-						}
-					}
-				}
-			}
-			sessionList = temp14SessionList;
-			sessionList.addAll(temp15SessionList);
 		} catch (Exception e) {
 			System.out.println(e);
 			e.printStackTrace();
 		}
 
+		ArrayList<Date> dateList = new ArrayList<Date>();
+		for (String string : sessionOrderList) {
+			try {
+				SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
+				Date date = dateFormat.parse(string);
+				dateList.add(date);
+			} catch (ParseException e) {
+				System.out.println(e);
+				e.printStackTrace();
+			}
+		}
+		Collections.sort(dateList);
+		sessionOrderList = new ArrayList<String>();
+		for (Date date : dateList) {
+			SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mmaa");
+			if (!sessionOrderList.contains(dateFormat.format(date)
+					.toLowerCase())) {
+				sessionOrderList.add(dateFormat.format(date).toLowerCase());
+			}
+		}
+
+		sessionList.addAll(breakSessionList);
+		for (String startHour : sessionOrderList) {
+			for (Session session : sessionList) {
+				if (session.getDay() != null) {
+					if (session.getDay().contains("14")
+							&& (session.getStartHour() == startHour || session
+									.getStartHour().equals(startHour))) {
+						temp14SessionList.add(session);
+					} else if (session.getDay().contains("15")
+							&& (session.getStartHour() == startHour || session
+									.getStartHour().equals(startHour))) {
+						temp15SessionList.add(session);
+					}
+				}
+			}
+		}
+		sessionList = temp14SessionList;
+		sessionList.addAll(temp15SessionList);
+
 		for (Session session : sessionList) {
 			List<Long> tempSpeakerIdList = new ArrayList<Long>();
-			if (session.getSpeakerUrlList() != null && session.getId() != 925) {
+			if (session.getSpeakerUrlList() != null) {
 				for (String speakerUrl : session.getSpeakerUrlList()) {
 					for (Speaker speaker : speakerList) {
 						if (speaker.getUrl() == speakerUrl
@@ -431,7 +418,7 @@ public class BaseResources {
 				session.setSpeakerIDList(tempSpeakerIdList);
 			}
 		}
-		
+
 		//
 
 		for (Sponsor sponsor : sponsorList) {

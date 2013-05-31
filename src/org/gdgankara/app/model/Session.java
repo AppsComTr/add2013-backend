@@ -34,6 +34,7 @@ public class Session implements Serializable {
 	private List<String> speakerUrlList;
 	private List<Speaker> speakerList;
 	private String tags;
+	private String url;
 
 	public Session() {
 	}
@@ -185,6 +186,14 @@ public class Session implements Serializable {
 
 	public void setSpeakerUrlList(List<String> speakerUrlList) {
 		this.speakerUrlList = speakerUrlList;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 
 }
